@@ -1,2 +1,3 @@
-# hello world
-print("Hello, world!")
+import sys
+
+print(" ".join(sys.argv[1:]))
