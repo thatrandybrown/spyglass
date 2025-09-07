@@ -11,10 +11,22 @@ def add_document(title, content):
     print(f"Added document '{title}' with ID {doc_id}")
 
 if __name__ == "__main__":
-    if len(sys.argv) >= 3:
-        title = sys.argv[1]
-        content = sys.argv[2]
-        add_document(title, content)
-        print(f"Total documents: {len(documents)}")
+    # switch on first command line argument
+    if len(sys.argv) < 2:
+        print("Usage: python main.py <add> <title> <content>")
+        sys.exit(1)
+    command = sys.argv[1]
+
+    # handle 'add' command
+    if command == "add":
+        if len(sys.argv) >= 4:
+            title = sys.argv[2]
+            content = " ".join(sys.argv[3:])
+            add_document(title, content)
+            print(f"Total documents: {len(documents)}")
+        else:
+            print("Usage: python main.py add <title> <content>")
+    # handle unknown command
     else:
-        print("Usage: python main.py <title> <content>")
+        print(f"Unknown command: {command}")
+        print("Usage: python main.py <add> <title> <content>")
