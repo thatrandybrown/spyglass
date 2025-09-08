@@ -11,11 +11,11 @@ def add_document(title, content):
     print(f"Added document '{title}' with ID {doc_id}")
 
 if __name__ == "__main__":
+    command = ""
     # switch on first command line argument
-    if len(sys.argv) < 2:
-        print("Usage: python main.py <add> <title> <content>")
-        sys.exit(1)
-    command = sys.argv[1]
+    while command!= "exit":
+        command = input("\n> ").strip()
+        print(command)
 
     # handle 'add' command
     if command == "add":
