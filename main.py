@@ -16,17 +16,13 @@ if __name__ == "__main__":
     while command!= "exit":
         command = input("\n> ").strip()
         print(command)
-
-    # handle 'add' command
-    if command == "add":
-        if len(sys.argv) >= 4:
-            title = sys.argv[2]
-            content = " ".join(sys.argv[3:])
+        if command.startswith("add "):
+            title, content = command.split(" ", 1)[1].split(" ", 1)
+            if not title or not content:
+                print("Usage: add <title> <content>")
+                continue
             add_document(title, content)
             print(f"Total documents: {len(documents)}")
         else:
-            print("Usage: python main.py add <title> <content>")
-    # handle unknown command
-    else:
-        print(f"Unknown command: {command}")
-        print("Usage: python main.py <add> <title> <content>")
+            print(f"Unknown command: {command}")
+            print("Usage: python main.py <add> <title> <content>")
