@@ -10,6 +10,18 @@ def add_document(title, content):
     documents.append({"id": doc_id, "title": title, "content": content})
     print(f"Added document '{title}' with ID {doc_id}")
 
+def query_documents(query_text):
+    results = []
+    query_words = query_text.lower().split()
+    for doc in documents:
+        content_lower = doc["content"].lower()
+        count = sum(content_lower.count(word) for word in query_words)
+        if count > 0:
+            results.append((doc, count))
+    # Sort by match count (descending)
+    results.sort(key=lambda x: x[1], reverse=True)
+    return results
+
 if __name__ == "__main__":
     command = ""
     # switch on first command line argument
