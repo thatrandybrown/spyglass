@@ -35,6 +35,14 @@ if __name__ == "__main__":
                 continue
             add_document(title, content)
             print(f"Total documents: {len(documents)}")
+        elif command.startswith("query "):
+            query_text = command.split(" ", 1)[1]
+            results = query_documents(query_text)
+            if results:
+                for doc, count in results:
+                    print(f"ID {doc['id']}: '{doc['title']}' (matches: {count})")
+            else:
+                print("No documents found matching your query.")
         else:
             print(f"Unknown command: {command}")
             print("Usage: python main.py <add> <title> <content>")
