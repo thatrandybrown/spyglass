@@ -43,6 +43,8 @@ if __name__ == "__main__":
                     print(f"ID {doc['id']}: '{doc['title']}' (matches: {count})")
             else:
                 print("No documents found matching your query.")
+        elif command == "exit":
+            break
         else:
             print(f"Unknown command: {command}")
             print("Usage: python main.py <add> <title> <content>")
