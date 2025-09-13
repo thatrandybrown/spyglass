@@ -5,6 +5,11 @@ import sys
 # Document storage - simple in-memory list of dictionaries
 documents = []
 
+# read document from file path
+def read_document(file_path):
+    with open(file_path, "r") as file:
+        return file.read()
+
 def add_document(title, content):
     doc_id = len(documents)
     documents.append({"id": doc_id, "title": title, "content": content})
