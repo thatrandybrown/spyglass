@@ -34,11 +34,8 @@ if __name__ == "__main__":
         command = input("\n> ").strip()
         print(command)
         if command.startswith("add "):
-            title, content = command.split(" ", 1)[1].split(" ", 1)
-            if not title or not content:
-                print("Usage: add <title> <content>")
-                continue
-            add_document(title, content)
+            filepath = command.split(" ", 1)[1]
+            add_document(filepath, read_document(filepath))
             print(f"Total documents: {len(documents)}")
         elif command.startswith("query "):
             query_text = command.split(" ", 1)[1]
