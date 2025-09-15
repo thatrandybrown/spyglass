@@ -20,11 +20,20 @@ def query_documents(query_text):
     query_words = query_text.lower().split()
     for doc in documents:
         content_lower = doc["content"].lower()
+        content_words = content_lower.split()
+        total_words = len(content_words)
+
+        if total_words == 0:  # Avoid division by zero
+            continue
+
         count = sum(content_lower.count(word) for word in query_words)
         if count > 0:
-            results.append((doc, count))
-    # Sort by match count (descending)
-    results.sort(key=lambda x: x[1], reverse=True)
+            # Calculate match percentage
+            match_percentage = (count / total_words) * 100
+            results.append((doc, count, match_percentage))
+
+    # Sort by match percentage (descending)
+    results.sort(key=lambda x: x[2], reverse=True)
     return results
 
 if __name__ == "__main__":
@@ -41,8 +50,8 @@ if __name__ == "__main__":
             query_text = command.split(" ", 1)[1]
             results = query_documents(query_text)
             if results:
-                for doc, count in results:
-                    print(f"ID {doc['id']}: '{doc['title']}' (matches: {count})")
+                for doc, count, percentage in results:
+                    print(f"ID {doc['id']}: '{doc['title']}' (matches: {count}, {percentage:.2f}% of document)")
             else:
                 print("No documents found matching your query.")
         elif command == "exit":
