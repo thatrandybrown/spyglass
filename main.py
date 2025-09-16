@@ -1,9 +1,14 @@
 import sys
-
-# print(sys.argv[1])
+import re
 
 # Document storage - simple in-memory list of dictionaries
 documents = []
+
+def tokenize(text):
+    """Split text into lowercase tokens, removing punctuation"""
+    # Convert to lowercase and split on whitespace and punctuation
+    tokens = re.findall(r'\b\w+\b', text.lower())
+    return tokens
 
 # read document from file path
 def read_document(file_path):
@@ -17,16 +22,15 @@ def add_document(title, content):
 
 def query_documents(query_text):
     results = []
-    query_words = query_text.lower().split()
+    query_words = tokenize(query_text)
     for doc in documents:
-        content_lower = doc["content"].lower()
-        content_words = content_lower.split()
+        content_words = tokenize(doc["content"])
         total_words = len(content_words)
 
         if total_words == 0:  # Avoid division by zero
             continue
 
-        count = sum(content_lower.count(word) for word in query_words)
+        count = sum(content_words.count(word) for word in query_words)
         if count > 0:
             # Calculate match percentage
             match_percentage = (count / total_words) * 100
