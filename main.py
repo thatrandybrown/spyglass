@@ -1,5 +1,6 @@
 import sys
 import re
+from collections import Counter
 
 # Document storage - simple in-memory list of dictionaries
 documents = []
@@ -10,6 +11,17 @@ def tokenize(text):
     tokens = re.findall(r'\b\w+\b', text.lower())
     return tokens
 
+def compute_term_frequency(tokens):
+    """Compute term frequency for a list of tokens"""
+    total_tokens = len(tokens)
+    if total_tokens == 0:
+        return {}
+
+    term_counts = Counter(tokens)
+    # Convert to relative frequencies (TF = count / total_tokens)
+    tf = {term: count / total_tokens for term, count in term_counts.items()}
+    return tf
+
 # read document from file path
 def read_document(file_path):
     with open(file_path, "r") as file:
@@ -17,23 +29,30 @@ def read_document(file_path):
 
 def add_document(title, content):
     doc_id = len(documents)
-    documents.append({"id": doc_id, "title": title, "content": content})
+    tokens = tokenize(content)
+    tf = compute_term_frequency(tokens)
+
+    documents.append({
+        "id": doc_id,
+        "title": title,
+        "content": content,
+        "tokens": tokens,
+        "tf": tf
+    })
     print(f"Added document '{title}' with ID {doc_id}")
 
 def query_documents(query_text):
     results = []
     query_words = tokenize(query_text)
     for doc in documents:
-        content_words = tokenize(doc["content"])
-        total_words = len(content_words)
-
-        if total_words == 0:  # Avoid division by zero
+        if len(doc["tokens"]) == 0:  # Avoid division by zero
             continue
 
-        count = sum(content_words.count(word) for word in query_words)
+        # Use pre-computed term frequencies
+        count = sum(doc["tf"].get(word, 0) * len(doc["tokens"]) for word in query_words)
         if count > 0:
             # Calculate match percentage
-            match_percentage = (count / total_words) * 100
+            match_percentage = (count / len(doc["tokens"])) * 100
             results.append((doc, count, match_percentage))
 
     # Sort by match percentage (descending)
