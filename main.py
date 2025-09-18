@@ -22,6 +22,15 @@ def compute_term_frequency(tokens):
     tf = {term: count / total_tokens for term, count in term_counts.items()}
     return tf
 
+def compute_document_frequency():
+    """Compute how many documents each term appears in"""
+    df = {}
+    for doc in documents:
+        unique_terms = set(doc["tokens"])
+        for term in unique_terms:
+            df[term] = df.get(term, 0) + 1
+    return df
+
 # read document from file path
 def read_document(file_path):
     with open(file_path, "r") as file:
