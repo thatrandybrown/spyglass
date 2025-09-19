@@ -1,6 +1,7 @@
 import sys
 import re
 from collections import Counter
+import math
 
 # Document storage - simple in-memory list of dictionaries
 documents = []
@@ -53,18 +54,24 @@ def add_document(title, content):
 def query_documents(query_text):
     results = []
     query_words = tokenize(query_text)
+    df = compute_document_frequency()
+    total_docs = len(documents)
+
     for doc in documents:
-        if len(doc["tokens"]) == 0:  # Avoid division by zero
+        if len(doc["tokens"]) == 0:
             continue
 
-        # Use pre-computed term frequencies
-        count = sum(doc["tf"].get(word, 0) * len(doc["tokens"]) for word in query_words)
-        if count > 0:
-            # Calculate match percentage
-            match_percentage = (count / len(doc["tokens"])) * 100
-            results.append((doc, count, match_percentage))
+        # Calculate TF-IDF score
+        tfidf_score = 0
+        for word in query_words:
+            tf = doc["tf"].get(word, 0)
+            if word in df and tf > 0:
+                idf = math.log(total_docs / df[word])
+                tfidf_score += tf * idf
 
-    # Sort by match percentage (descending)
+        if tfidf_score > 0:
+            results.append((doc, tfidf_score, tfidf_score))
+
     results.sort(key=lambda x: x[2], reverse=True)
     return results
 
@@ -83,7 +90,7 @@ if __name__ == "__main__":
             results = query_documents(query_text)
             if results:
                 for doc, count, percentage in results:
-                    print(f"ID {doc['id']}: '{doc['title']}' (matches: {count}, {percentage:.2f}% of document)")
+                    print(f"ID {doc['id']}: '{doc['title']}' (TF-IDF score: {count:.4f})")
             else:
                 print("No documents found matching your query.")
         elif command == "exit":
