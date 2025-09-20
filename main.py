@@ -32,6 +32,17 @@ def compute_document_frequency():
             df[term] = df.get(term, 0) + 1
     return df
 
+def compute_query_vector(query_words, df, total_docs):
+    """Convert query to TF-IDF vector"""
+    query_tf = Counter(query_words)
+    query_vector = {}
+    for word in query_tf:
+        tf = query_tf[word] / len(query_words)
+        if word in df:
+            idf = math.log(total_docs / df[word])
+            query_vector[word] = tf * idf
+    return query_vector
+
 # read document from file path
 def read_document(file_path):
     with open(file_path, "r") as file:
