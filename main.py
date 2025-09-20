@@ -101,17 +101,11 @@ def query_documents(query_text):
         if len(doc["tokens"]) == 0:
             continue
 
-        # Calculate TF-IDF score using query vector
-        tfidf_score = 0
-        for word, query_weight in query_vector.items():
-            doc_tf = doc["tf"].get(word, 0)
-            if doc_tf > 0:
-                doc_idf = math.log(total_docs / df[word])
-                doc_weight = doc_tf * doc_idf
-                tfidf_score += query_weight * doc_weight
+        # Calculate cosine similarity score
+        similarity_score = compute_cosine_similarity(query_vector, doc["tf"], df, total_docs)
 
-        if tfidf_score > 0:
-            results.append((doc, tfidf_score, tfidf_score))
+        if similarity_score > 0:
+            results.append((doc, similarity_score, similarity_score))
 
     results.sort(key=lambda x: x[2], reverse=True)
     return results
@@ -131,7 +125,7 @@ if __name__ == "__main__":
             results = query_documents(query_text)
             if results:
                 for doc, count, percentage in results:
-                    print(f"ID {doc['id']}: '{doc['title']}' (TF-IDF score: {count:.4f})")
+                    print(f"ID {doc['id']}: '{doc['title']}' (Cosine similarity: {count:.4f})")
             else:
                 print("No documents found matching your query.")
         elif command == "exit":
