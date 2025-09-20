@@ -43,6 +43,34 @@ def compute_query_vector(query_words, df, total_docs):
             query_vector[word] = tf * idf
     return query_vector
 
+def compute_cosine_similarity(query_vector, doc_tf, df, total_docs):
+    """Compute cosine similarity between query and document vectors"""
+    dot_product = 0
+    query_norm = 0
+    doc_norm = 0
+
+    # Calculate dot product and norms
+    for word, query_weight in query_vector.items():
+        doc_tf_val = doc_tf.get(word, 0)
+        if doc_tf_val > 0:
+            doc_idf = math.log(total_docs / df[word])
+            doc_weight = doc_tf_val * doc_idf
+            dot_product += query_weight * doc_weight
+            doc_norm += doc_weight ** 2
+        query_norm += query_weight ** 2
+
+    # Add document terms not in query to doc_norm
+    for word, tf_val in doc_tf.items():
+        if word not in query_vector and word in df:
+            doc_idf = math.log(total_docs / df[word])
+            doc_weight = tf_val * doc_idf
+            doc_norm += doc_weight ** 2
+
+    if query_norm == 0 or doc_norm == 0:
+        return 0
+
+    return dot_product / (math.sqrt(query_norm) * math.sqrt(doc_norm))
+
 # read document from file path
 def read_document(file_path):
     with open(file_path, "r") as file:
