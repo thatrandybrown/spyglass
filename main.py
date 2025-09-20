@@ -67,18 +67,20 @@ def query_documents(query_text):
     query_words = tokenize(query_text)
     df = compute_document_frequency()
     total_docs = len(documents)
+    query_vector = compute_query_vector(query_words, df, total_docs)
 
     for doc in documents:
         if len(doc["tokens"]) == 0:
             continue
 
-        # Calculate TF-IDF score
+        # Calculate TF-IDF score using query vector
         tfidf_score = 0
-        for word in query_words:
-            tf = doc["tf"].get(word, 0)
-            if word in df and tf > 0:
-                idf = math.log(total_docs / df[word])
-                tfidf_score += tf * idf
+        for word, query_weight in query_vector.items():
+            doc_tf = doc["tf"].get(word, 0)
+            if doc_tf > 0:
+                doc_idf = math.log(total_docs / df[word])
+                doc_weight = doc_tf * doc_idf
+                tfidf_score += query_weight * doc_weight
 
         if tfidf_score > 0:
             results.append((doc, tfidf_score, tfidf_score))
