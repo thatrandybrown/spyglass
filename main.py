@@ -167,7 +167,7 @@ if __name__ == "__main__":
             print(f"Total documents: {len(documents)}")
         elif command.startswith("query "):
             query_text = command.split(" ", 1)[1]
-            results = query_documents(query_text)
+            results = query_documents_with_index(query_text)  # Use the indexed version
             if results:
                 for doc, count, percentage in results:
                     print(f"ID {doc['id']}: '{doc['title']}' (Cosine similarity: {count:.4f})")
