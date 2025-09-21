@@ -71,6 +71,16 @@ def compute_cosine_similarity(query_vector, doc_tf, df, total_docs):
 
     return dot_product / (math.sqrt(query_norm) * math.sqrt(doc_norm))
 
+def build_inverted_index():
+    """Build inverted index: term -> list of doc IDs containing that term"""
+    inverted_index = {}
+    for doc in documents:
+        for term in set(doc["tokens"]):  # unique terms only
+            if term not in inverted_index:
+                inverted_index[term] = []
+            inverted_index[term].append(doc["id"])
+    return inverted_index
+
 # read document from file path
 def read_document(file_path):
     with open(file_path, "r") as file:
