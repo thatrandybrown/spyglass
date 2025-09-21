@@ -120,6 +120,41 @@ def query_documents(query_text):
     results.sort(key=lambda x: x[2], reverse=True)
     return results
 
+def query_documents_with_index(query_text):
+    """Query using inverted index for efficiency"""
+    query_words = tokenize(query_text)
+    if not query_words:
+        return []
+
+    # Find candidate documents using inverted index
+    inverted_index = build_inverted_index()
+    candidate_doc_ids = set()
+
+    for word in query_words:
+        if word in inverted_index:
+            candidate_doc_ids.update(inverted_index[word])
+
+    if not candidate_doc_ids:
+        return []
+
+    # Now only compute similarity for candidate documents
+    results = []
+    df = compute_document_frequency()
+    total_docs = len(documents)
+    query_vector = compute_query_vector(query_words, df, total_docs)
+
+    for doc_id in candidate_doc_ids:
+        doc = documents[doc_id]
+        if len(doc["tokens"]) == 0:
+            continue
+
+        similarity_score = compute_cosine_similarity(query_vector, doc["tf"], df, total_docs)
+        if similarity_score > 0:
+            results.append((doc, similarity_score, similarity_score))
+
+    results.sort(key=lambda x: x[2], reverse=True)
+    return results
+
 if __name__ == "__main__":
     command = ""
     # switch on first command line argument
