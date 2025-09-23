@@ -2,6 +2,8 @@ import sys
 import re
 from collections import Counter
 import math
+import json
+import os
 
 # Document storage - simple in-memory list of dictionaries
 documents = []
@@ -154,6 +156,40 @@ def query_documents_with_index(query_text):
 
     results.sort(key=lambda x: x[2], reverse=True)
     return results
+
+def save_index_to_disk(index_path="index.json"):
+    """Save inverted index and document metadata to disk"""
+    inverted_index = build_inverted_index()
+    df = compute_document_frequency()
+
+    index_data = {
+        "inverted_index": inverted_index,
+        "document_frequency": df,
+        "total_docs": len(documents),
+        "documents_metadata": [
+            {
+                "id": doc["id"],
+                "title": doc["title"],
+                "tf": doc["tf"]
+            } for doc in documents
+        ]
+    }
+
+    with open(index_path, 'w') as f:
+        json.dump(index_data, f, indent=2)
+    print(f"Index saved to {index_path}")
+
+def load_index_from_disk(index_path="index.json"):
+    """Load inverted index and document metadata from disk"""
+    if not os.path.exists(index_path):
+        print(f"Index file {index_path} not found")
+        return None
+
+    with open(index_path, 'r') as f:
+        index_data = json.load(f)
+
+    print(f"Index loaded from {index_path}")
+    return index_data
 
 if __name__ == "__main__":
     command = ""
