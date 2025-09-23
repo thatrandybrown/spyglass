@@ -158,7 +158,6 @@ def query_documents_with_index(query_text):
     return results
 
 def save_index_to_disk(index_path="index.json"):
-    """Save inverted index and document metadata to disk"""
     inverted_index = build_inverted_index()
     df = compute_document_frequency()
 
@@ -166,21 +165,14 @@ def save_index_to_disk(index_path="index.json"):
         "inverted_index": inverted_index,
         "document_frequency": df,
         "total_docs": len(documents),
-        "documents_metadata": [
-            {
-                "id": doc["id"],
-                "title": doc["title"],
-                "tf": doc["tf"]
-            } for doc in documents
-        ]
+        "documents": documents  # Save full documents
     }
 
     with open(index_path, 'w') as f:
         json.dump(index_data, f, indent=2)
-    print(f"Index saved to {index_path}")
+    print(f"Index and documents saved to {index_path}")
 
 def load_index_from_disk(index_path="index.json"):
-    """Load inverted index and document metadata from disk"""
     if not os.path.exists(index_path):
         print(f"Index file {index_path} not found")
         return None
@@ -188,8 +180,11 @@ def load_index_from_disk(index_path="index.json"):
     with open(index_path, 'r') as f:
         index_data = json.load(f)
 
-    print(f"Index loaded from {index_path}")
-    return index_data
+    # Restore the documents list
+    documents = index_data["documents"]
+
+    print(f"Index and {len(documents)} documents loaded from {index_path}")
+    return documents, index_data
 
 if __name__ == "__main__":
     command = ""
