@@ -88,7 +88,16 @@ def read_document(file_path):
     with open(file_path, "r") as file:
         return file.read()
 
+def is_file_already_indexed(filepath):
+    """Check if a file is already in the index"""
+    return any(doc["title"] == filepath for doc in documents)
+
+# Modified add_document to check for duplicates
 def add_document(title, content):
+    if is_file_already_indexed(title):
+        print(f"File '{title}' already indexed, skipping")
+        return
+
     doc_id = len(documents)
     tokens = tokenize(content)
     tf = compute_term_frequency(tokens)
