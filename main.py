@@ -4,6 +4,7 @@ from collections import Counter
 import math
 import json
 import os
+import time
 
 # Document storage - simple in-memory list of dictionaries
 documents = []
@@ -174,14 +175,19 @@ def save_index_to_disk(index_path="index.json"):
         "inverted_index": inverted_index,
         "document_frequency": df,
         "total_docs": len(documents),
-        "documents": documents  # Save full documents
+        "documents": documents,
+        # "indexed_files": [doc["title"] for doc in documents],  # Track file paths
+        "last_updated": time.time()
     }
 
     with open(index_path, 'w') as f:
         json.dump(index_data, f, indent=2)
-    print(f"Index and documents saved to {index_path}")
+    print(f"Index and {len(documents)} documents saved to {index_path}")
 
-def load_index_from_disk(index_path="index.json"):
+def load_index_from_disk(index_path="spyglass_index.json"):
+    """Load inverted index, document metadata, and full documents from disk"""
+    global documents
+
     if not os.path.exists(index_path):
         print(f"Index file {index_path} not found")
         return None
@@ -192,10 +198,13 @@ def load_index_from_disk(index_path="index.json"):
     # Restore the documents list
     documents = index_data["documents"]
 
-    print(f"Index and {len(documents)} documents loaded from {index_path}")
-    return documents, index_data
+    print(f"Index loaded: {len(documents)} documents from {index_path}")
+    return index_data
 
 if __name__ == "__main__":
+    # Try to load existing index on startup
+    load_index_from_disk()
+
     command = ""
     # switch on first command line argument
     while command!= "exit":
@@ -214,6 +223,10 @@ if __name__ == "__main__":
             else:
                 print("No documents found matching your query.")
         elif command == "exit":
+            # Auto-save on exit
+            if documents:
+                save_index_to_disk()
+                print("Index saved automatically on exit")
             break
         else:
             print(f"Unknown command: {command}")
