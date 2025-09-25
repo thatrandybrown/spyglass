@@ -184,7 +184,7 @@ def save_index_to_disk(index_path="index.json"):
         json.dump(index_data, f, indent=2)
     print(f"Index and {len(documents)} documents saved to {index_path}")
 
-def load_index_from_disk(index_path="spyglass_index.json"):
+def load_index_from_disk(index_path="index.json"):
     """Load inverted index, document metadata, and full documents from disk"""
     global documents
 
