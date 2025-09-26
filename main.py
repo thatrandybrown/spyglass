@@ -205,29 +205,24 @@ if __name__ == "__main__":
     # Try to load existing index on startup
     load_index_from_disk()
 
-    command = ""
-    # switch on first command line argument
-    while command!= "exit":
-        command = input("\n> ").strip()
-        print(command)
-        if command.startswith("add "):
-            filepath = command.split(" ", 1)[1]
-            add_document(filepath, read_document(filepath))
-            print(f"Total documents: {len(documents)}")
-        elif command.startswith("query "):
-            query_text = command.split(" ", 1)[1]
-            results = query_documents_with_index(query_text)  # Use the indexed version
-            if results:
-                for doc, count, percentage in results:
-                    print(f"ID {doc['id']}: '{doc['title']}' (Cosine similarity: {count:.4f})")
-            else:
-                print("No documents found matching your query.")
-        elif command == "exit":
-            # Auto-save on exit
-            if documents:
-                save_index_to_disk()
-                print("Index saved automatically on exit")
-            break
+    command = " ".join(sys.argv[1:]).strip()
+
+    if command.startswith("add "):
+        filepath = command.split(" ", 1)[1]
+        add_document(filepath, read_document(filepath))
+        print(f"Total documents: {len(documents)}")
+    elif command.startswith("query "):
+        query_text = command.split(" ", 1)[1]
+        results = query_documents_with_index(query_text)  # Use the indexed version
+        if results:
+            for doc, count, percentage in results:
+                print(f"ID {doc['id']}: '{doc['title']}' (Cosine similarity: {count:.4f})")
         else:
-            print(f"Unknown command: {command}")
-            print("Usage: python main.py <add> <title> <content>")
+            print("No documents found matching your query.")
+    else:
+        print(f"Unknown command: {command}")
+        print("Usage: python main.py <add> <title> <content>")
+
+    if documents:
+        save_index_to_disk()
+        print("Index saved automatically on exit")
