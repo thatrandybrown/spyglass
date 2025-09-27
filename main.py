@@ -167,6 +167,38 @@ def query_documents_with_index(query_text):
     results.sort(key=lambda x: x[2], reverse=True)
     return results
 
+def extract_snippet(content, query_words, max_sentences=2):
+    """Extract sentences containing query terms"""
+    import re
+
+    query_words_lower = [word.lower() for word in query_words]
+
+    # Split content into sentences (simple approach)
+    sentences = re.split(r'[.!?]+', content)
+    sentences = [s.strip() for s in sentences if s.strip()]
+
+    # Find sentences containing query words
+    matching_sentences = []
+    for sentence in sentences:
+        sentence_words = [word.lower() for word in re.findall(r'\b\w+\b', sentence)]
+        if any(query_word in sentence_words for query_word in query_words_lower):
+            # Highlight query terms in the sentence
+            highlighted_sentence = sentence
+            for word in query_words:
+                # Case-insensitive replacement with word boundaries
+                pattern = r'\b' + re.escape(word) + r'\b'
+                highlighted_sentence = re.sub(pattern, f"**{word}**", highlighted_sentence, flags=re.IGNORECASE)
+            matching_sentences.append(highlighted_sentence)
+
+            if len(matching_sentences) >= max_sentences:
+                break
+
+    if not matching_sentences:
+        # Fallback: return first sentence if no matches found
+        return sentences[0] if sentences else "No content available"
+
+    return " ".join(matching_sentences)
+
 def save_index_to_disk(index_path="index.json"):
     inverted_index = build_inverted_index()
     df = compute_document_frequency()
@@ -216,7 +248,10 @@ if __name__ == "__main__":
         results = query_documents_with_index(query_text)  # Use the indexed version
         if results:
             for doc, count, percentage in results:
+                query_words = tokenize(query_text)
+                snippet = extract_snippet(doc["content"], query_words)
                 print(f"ID {doc['id']}: '{doc['title']}' (Cosine similarity: {count:.4f})")
+                print(f"Snippet: {snippet}\n")
         else:
             print("No documents found matching your query.")
     else:
