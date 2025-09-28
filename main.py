@@ -74,6 +74,18 @@ def compute_cosine_similarity(query_vector, doc_tf, df, total_docs):
 
     return dot_product / (math.sqrt(query_norm) * math.sqrt(doc_norm))
 
+def compute_bm25_score(query_words, doc_tf, df, total_docs, k1=1.2, b=0.75):
+    """Compute BM25 score between query and document"""
+    doc_length = sum(doc_tf.values())
+    avg_doc_length = sum(sum(doc["tf"].values()) for doc in documents) / len(documents)
+    score = 0
+    for word in query_words:
+        if word in doc_tf and word in df:
+            tf = doc_tf[word]
+            idf = math.log((total_docs - df[word] + 0.5) / (df[word] + 0.5))
+            score += idf * (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (doc_length / avg_doc_length)))
+    return score
+
 def build_inverted_index():
     """Build inverted index: term -> list of doc IDs containing that term"""
     inverted_index = {}
