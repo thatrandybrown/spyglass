@@ -150,7 +150,6 @@ def query_documents_with_index(query_text):
     if not query_words:
         return []
 
-    # Find candidate documents using inverted index
     inverted_index = build_inverted_index()
     candidate_doc_ids = set()
 
@@ -161,7 +160,6 @@ def query_documents_with_index(query_text):
     if not candidate_doc_ids:
         return []
 
-    # Now only compute similarity for candidate documents
     results = []
     df = compute_document_frequency()
     total_docs = len(documents)
