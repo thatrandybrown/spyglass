@@ -77,7 +77,7 @@ def compute_cosine_similarity(query_vector, doc_tf, df, total_docs):
 def compute_bm25_score(query_words, doc_tf, df, total_docs, k1=1.2, b=0.75):
     """Compute BM25 score between query and document"""
     doc_length = sum(doc_tf.values())
-    avg_doc_length = sum(sum(doc["tf"].values()) for doc in documents) / len(documents)
+    avg_doc_length = sum(sum(doc["raw_tf"].values()) for doc in documents) / len(documents)
     score = 0
     for word in query_words:
         if word in doc_tf and word in df:
@@ -113,13 +113,17 @@ def add_document(title, content):
 
     doc_id = len(documents)
     tokens = tokenize(content)
+    # keep normalized for cosine similarity
     tf = compute_term_frequency(tokens)
+    # raw for BM25
+    raw_tf = dict(Counter(tokens))
 
     documents.append({
         "id": doc_id,
         "title": title,
         "content": content,
         "tokens": tokens,
+        "raw_tf": raw_tf,
         "tf": tf
     })
     print(f"Added document '{title}' with ID {doc_id}")
@@ -170,9 +174,11 @@ def query_documents_with_index(query_text):
         if len(doc["tokens"]) == 0:
             continue
 
-        similarity_score = compute_cosine_similarity(query_vector, doc["tf"], df, total_docs)
-        if similarity_score > 0:
-            results.append((doc, similarity_score, similarity_score))
+        # similarity_score = compute_cosine_similarity(query_vector, doc["tf"], df, total_docs)
+        # if similarity_score > 0:
+        #     results.append((doc, similarity_score, similarity_score))
+        bm25_score = compute_bm25_score(query_words, doc["raw_tf"], df, total_docs)
+        results.append((doc, bm25_score, bm25_score))
 
     results.sort(key=lambda x: x[2], reverse=True)
     return results
@@ -260,7 +266,7 @@ if __name__ == "__main__":
             for doc, count, percentage in results:
                 query_words = tokenize(query_text)
                 snippet = extract_snippet(doc["content"], query_words)
-                print(f"ID {doc['id']}: '{doc['title']}' (Cosine similarity: {count:.4f})")
+                print(f"ID {doc['id']}: '{doc['title']}' (BM25 score: {count:.4f})")
                 print(f"Snippet: {snippet}\n")
         else:
             print("No documents found matching your query.")
