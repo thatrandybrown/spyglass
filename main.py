@@ -9,10 +9,23 @@ import time
 # Document storage - simple in-memory list of dictionaries
 documents = []
 
-def tokenize(text):
+STOPWORDS = {
+    'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from', 'has', 'he',
+    'in', 'is', 'it', 'its', 'of', 'on', 'that', 'the', 'to', 'was', 'will', 'with',
+    'i', 'you', 'we', 'they', 'this', 'these', 'those', 'but', 'or', 'not', 'can',
+    'could', 'should', 'would', 'have', 'had', 'do', 'does', 'did', 'get', 'got'
+}
+
+def remove_stopwords(tokens):
+    """Remove common stopwords from token list"""
+    return [token for token in tokens if token not in STOPWORDS]
+
+def tokenize(text, remove_stops=True):
     """Split text into lowercase tokens, removing punctuation"""
     # Convert to lowercase and split on whitespace and punctuation
     tokens = re.findall(r'\b\w+\b', text.lower())
+    if remove_stops:
+        tokens = remove_stopwords(tokens)
     return tokens
 
 def compute_term_frequency(tokens):
