@@ -141,6 +141,31 @@ def add_document(title, content):
     })
     print(f"Added document '{title}' with ID {doc_id}")
 
+def batch_index_directory(directory_path, extensions=None):
+    """Index all files in a directory with specified extensions"""
+    if extensions is None:
+        extensions = {'.txt', '.md', '.html', '.py', '.js', '.json'}
+
+    indexed_count = 0
+    skipped_count = 0
+
+    for root, dirs, files in os.walk(directory_path):
+        for file in files:
+            if any(file.lower().endswith(ext) for ext in extensions):
+                filepath = os.path.join(root, file)
+                try:
+                    if not is_file_already_indexed(filepath):
+                        content = read_document(filepath)
+                        add_document(filepath, content)
+                        indexed_count += 1
+                    else:
+                        skipped_count += 1
+                except Exception as e:
+                    print(f"Error indexing {filepath}: {e}")
+
+    print(f"Batch indexing complete: {indexed_count} files indexed, {skipped_count} skipped")
+    return indexed_count, skipped_count
+
 def query_documents(query_text):
     results = []
     query_words = tokenize(query_text)
@@ -271,6 +296,10 @@ if __name__ == "__main__":
     if command.startswith("add "):
         filepath = command.split(" ", 1)[1]
         add_document(filepath, read_document(filepath))
+        print(f"Total documents: {len(documents)}")
+    elif command.startswith("batch "): # maybe index?
+        directory_path = command.split(" ", 1)[1]
+        batch_index_directory(directory_path)
         print(f"Total documents: {len(documents)}")
     elif command.startswith("query "):
         query_text = command.split(" ", 1)[1]
