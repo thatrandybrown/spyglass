@@ -314,7 +314,10 @@ if __name__ == "__main__":
             print("No documents found matching your query.")
     else:
         print(f"Unknown command: {command}")
-        print("Usage: python main.py <add> <title> <content>")
+        print("Usage:")
+        print("  python main.py add <filepath>")
+        print("  python main.py batch <directory>")
+        print("  python main.py query <search terms>")
 
     if documents:
         save_index_to_disk()
