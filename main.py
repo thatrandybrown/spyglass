@@ -312,6 +312,12 @@ if __name__ == "__main__":
                 print(f"Snippet: {snippet}\n")
         else:
             print("No documents found matching your query.")
+    elif command == "reindex":
+        # Rebuild the index from existing documents
+        print("Reindexing all documents...")
+        # reprocess all documents to update their tokens and term frequencies
+        save_index_to_disk()
+        print(f"Total documents: {len(documents)}")
     else:
         print(f"Unknown command: {command}")
         print("Usage:")
