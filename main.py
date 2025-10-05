@@ -316,6 +316,10 @@ if __name__ == "__main__":
         # Rebuild the index from existing documents
         print("Reindexing all documents...")
         # reprocess all documents to update their tokens and term frequencies
+        existing_docs = documents[:]
+        documents = []
+        for doc in existing_docs:
+            add_document(doc["title"], doc["content"])
         save_index_to_disk()
         print(f"Total documents: {len(documents)}")
     else:
