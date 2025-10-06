@@ -287,6 +287,23 @@ def load_index_from_disk(index_path="index.json"):
     print(f"Index loaded: {len(documents)} documents from {index_path}")
     return index_data
 
+def format_search_results(results, query_words):
+    """Pretty-print search results in a table-like layout"""
+    if not results:
+        print("\nNo documents found matching your query.\n")
+        return
+
+    print("\n" + "="*80)
+    print(f"Found {len(results)} result(s)")
+    print("="*80 + "\n")
+
+    for i, (doc, score, _) in enumerate(results, 1):
+        snippet = extract_snippet(doc["content"], query_words)
+        print(f"[{i}] {doc['title']}")
+        print(f"    Score: {score:.4f}")
+        print(f"    {snippet}")
+        print("-"*80)
+
 if __name__ == "__main__":
     # Try to load existing index on startup
     load_index_from_disk()
