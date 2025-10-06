@@ -321,14 +321,8 @@ if __name__ == "__main__":
     elif command.startswith("query "):
         query_text = command.split(" ", 1)[1]
         results = query_documents_with_index(query_text)  # Use the indexed version
-        if results:
-            for doc, count, percentage in results:
-                query_words = tokenize(query_text)
-                snippet = extract_snippet(doc["content"], query_words)
-                print(f"ID {doc['id']}: '{doc['title']}' (BM25 score: {count:.4f})")
-                print(f"Snippet: {snippet}\n")
-        else:
-            print("No documents found matching your query.")
+        query_words = tokenize(query_text)
+        format_search_results(results, query_words)
     elif command == "reindex":
         # Rebuild the index from existing documents
         print("Reindexing all documents...")
