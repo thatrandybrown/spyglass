@@ -1,8 +1,27 @@
 use serde::de::DeserializeOwned;
-use serde_json::Value;
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
+
+#[derive(Debug, Deserialize)]
+struct IndexedDocument {
+    id: usize,
+    title: String,
+    content: String,
+    tokens: Vec<String>,
+    raw_tf: HashMap<String, usize>,
+    tf: HashMap<String, f64>,
+}
+
+#[derive(Debug, Deserialize)]
+struct IndexData {
+    inverted_index: HashMap<String, Vec<usize>>,
+    document_frequency: HashMap<String, usize>,
+    total_docs: usize,
+    documents: Vec<IndexedDocument>,
+    last_updated: f64,
+}
 
 fn load_index_from_disk<T: DeserializeOwned>(
     index_path: &str,
@@ -21,23 +40,13 @@ fn load_index_from_disk<T: DeserializeOwned>(
 }
 
 fn main() {
-    match load_index_from_disk::<HashMap<String, Value>>("index.json") {
+    match load_index_from_disk::<IndexData>("index.json") {
         Ok(index_data) => {
-            let total_docs = index_data
-                .get("total_docs")
-                .and_then(|v| v.as_u64())
-                .unwrap_or(0);
-            let document_count = index_data
-                .get("documents")
-                .and_then(|v| v.as_array())
-                .map(|docs| docs.len())
-                .unwrap_or(0);
-
             println!(
-                "Index loaded from index.json: total_docs={}, documents={}, top_level_keys={}",
-                total_docs,
-                document_count,
-                index_data.len()
+                "Index loaded from index.json: total_docs={}, documents={}, terms={}",
+                index_data.total_docs,
+                index_data.documents.len(),
+                index_data.inverted_index.len()
             );
         }
         Err(err) => {
