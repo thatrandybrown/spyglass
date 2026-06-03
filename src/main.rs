@@ -53,6 +53,7 @@ fn main() {
             eprintln!("Failed to load index.json: {}", err);
         }
     }
+    let args: Vec<String> = std::env::args().collect();
 
     println!("Hello, world!");
 }
