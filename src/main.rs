@@ -4,6 +4,14 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
+const STOPWORDS: &[&str] = &[
+    "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "he",
+    "in", "is", "it", "its", "of", "on", "that", "the", "to", "was", "will", "with",
+    "i", "you", "we", "they", "this", "these", "those", "but", "or", "not", "can",
+    "could", "should", "would", "have", "had", "do", "does", "did", "get", "got",
+];
+
+
 #[derive(Debug, Deserialize)]
 struct IndexedDocument {
     id: usize,
