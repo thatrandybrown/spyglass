@@ -11,6 +11,13 @@ const STOPWORDS: &[&str] = &[
     "could", "should", "would", "have", "had", "do", "does", "did", "get", "got",
 ];
 
+fn remove_stopwords(tokens: &[String]) -> Vec<String> {
+    tokens
+        .iter()
+        .filter(|token| !STOPWORDS.contains(&token.as_str()))
+        .cloned()
+        .collect()
+}
 
 #[derive(Debug, Deserialize)]
 struct IndexedDocument {
