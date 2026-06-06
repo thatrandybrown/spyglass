@@ -1,8 +1,10 @@
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
+use regex::Regex;
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
+use std::sync::OnceLock;
 
 const STOPWORDS: &[&str] = &[
     "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "he",
@@ -17,6 +19,23 @@ fn remove_stopwords(tokens: &[String]) -> Vec<String> {
         .filter(|token| !STOPWORDS.contains(&token.as_str()))
         .cloned()
         .collect()
+}
+
+fn tokenize(text: &str, remove_stops: bool) -> Vec<String> {
+    static WORD_RE: OnceLock<Regex> = OnceLock::new();
+    let word_re = WORD_RE.get_or_init(|| Regex::new(r"\b\w+\b").expect("valid tokenizer regex"));
+
+    let lowercase_text = text.to_lowercase();
+    let tokens: Vec<String> = word_re
+        .find_iter(&lowercase_text)
+        .map(|m| m.as_str().to_string())
+        .collect();
+
+    if remove_stops {
+        remove_stopwords(&tokens)
+    } else {
+        tokens
+    }
 }
 
 #[derive(Debug, Deserialize)]
