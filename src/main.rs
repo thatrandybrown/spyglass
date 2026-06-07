@@ -57,6 +57,47 @@ struct IndexData {
     last_updated: f64,
 }
 
+fn compute_bm25_score(
+    query_words: &[String],
+    doc_tf: &HashMap<String, usize>,
+    df: &HashMap<String, usize>,
+    total_docs: usize,
+    documents: &[IndexedDocument],
+    k1: f64,
+    b: f64,
+) -> f64 {
+    if total_docs == 0 || documents.is_empty() {
+        return 0.0;
+    }
+
+    let doc_length: usize = doc_tf.values().sum();
+    let total_length: usize = documents
+        .iter()
+        .map(|doc| doc.raw_tf.values().sum::<usize>())
+        .sum();
+
+    if total_length == 0 {
+        return 0.0;
+    }
+
+    let avg_doc_length = total_length as f64 / documents.len() as f64;
+    let mut score = 0.0;
+
+    for word in query_words {
+        if let (Some(&tf), Some(&df_word)) = (doc_tf.get(word), df.get(word)) {
+            let tf_f = tf as f64;
+            let df_f = df_word as f64;
+            let total_docs_f = total_docs as f64;
+
+            let idf = ((total_docs_f - df_f + 0.5) / (df_f + 0.5)).ln();
+            let denom = tf_f + k1 * (1.0 - b + b * (doc_length as f64 / avg_doc_length));
+            score += idf * (tf_f * (k1 + 1.0)) / denom;
+        }
+    }
+
+    score
+}
+
 fn load_index_from_disk<T: DeserializeOwned>(
     index_path: &str,
 ) -> Result<T, Box<dyn std::error::Error>> {
