@@ -129,6 +129,19 @@ fn main() {
         }
     }
     let args: Vec<String> = std::env::args().collect();
+    let command = args[1..].join(" ").trim().to_string();
 
-    println!("Hello, world!");
+    if let Some(query_text) = command.strip_prefix("query ") {
+        // Stubbed to match the Python flow until the Rust search functions are ready.
+        // let results = query_documents_with_index(query_text);
+        let query_words = tokenize(query_text, true);
+        // format_search_results(&results, &query_words);
+
+        println!("Query stub parsed: {query_text}");
+        println!("Tokenized into {} query terms", query_words.len());
+    } else {
+        println!("Unknown command: {command}");
+        println!("Usage:");
+        println!("  cargo run -- query <search terms>");
+    }
 }
