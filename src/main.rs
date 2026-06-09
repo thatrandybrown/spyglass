@@ -1,7 +1,7 @@
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use regex::Regex;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
 use std::sync::OnceLock;
@@ -96,6 +96,47 @@ fn compute_bm25_score(
     }
 
     score
+}
+
+fn query_documents_with_index(query_text: &str, index_data: &IndexData) -> Vec<(usize, f64)> {
+    let query_words = tokenize(query_text, true);
+    if query_words.is_empty() {
+        return Vec::new();
+    }
+
+    let mut candidate_doc_ids: HashSet<usize> = HashSet::new();
+    for word in &query_words {
+        if let Some(doc_ids) = index_data.inverted_index.get(word) {
+            candidate_doc_ids.extend(doc_ids.iter().copied());
+        }
+    }
+
+    if candidate_doc_ids.is_empty() {
+        return Vec::new();
+    }
+
+    let mut results: Vec<(usize, f64)> = Vec::new();
+    for doc_id in candidate_doc_ids {
+        if let Some(doc) = index_data.documents.get(doc_id) {
+            if doc.tokens.is_empty() {
+                continue;
+            }
+
+            let bm25_score = compute_bm25_score(
+                &query_words,
+                &doc.raw_tf,
+                &index_data.document_frequency,
+                index_data.total_docs,
+                &index_data.documents,
+                1.2,
+                0.75,
+            );
+            results.push((doc_id, bm25_score));
+        }
+    }
+
+    results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+    results
 }
 
 fn load_index_from_disk<T: DeserializeOwned>(
