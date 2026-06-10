@@ -156,7 +156,7 @@ fn load_index_from_disk<T: DeserializeOwned>(
 }
 
 fn main() {
-    match load_index_from_disk::<IndexData>("index.json") {
+    let index_data = match load_index_from_disk::<IndexData>("index.json") {
         Ok(index_data) => {
             println!(
                 "Index loaded from index.json: total_docs={}, documents={}, terms={}",
@@ -164,11 +164,13 @@ fn main() {
                 index_data.documents.len(),
                 index_data.inverted_index.len()
             );
+            index_data
         }
         Err(err) => {
             eprintln!("Failed to load index.json: {}", err);
+            return;
         }
-    }
+    };
     let args: Vec<String> = std::env::args().collect();
     let command = args[1..].join(" ").trim().to_string();
 
