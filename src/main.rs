@@ -175,13 +175,24 @@ fn main() {
     let command = args[1..].join(" ").trim().to_string();
 
     if let Some(query_text) = command.strip_prefix("query ") {
-        // Stubbed to match the Python flow until the Rust search functions are ready.
-        // let results = query_documents_with_index(query_text);
-        let query_words = tokenize(query_text, true);
-        // format_search_results(&results, &query_words);
+        let results = query_documents_with_index(query_text, &index_data);
 
-        println!("Query stub parsed: {query_text}");
-        println!("Tokenized into {} query terms", query_words.len());
+        if results.is_empty() {
+            println!("\nNo documents found matching your query.\n");
+            return;
+        }
+
+        println!("\n{}", "=".repeat(80));
+        println!("Found {} result(s)", results.len());
+        println!("{}\n", "=".repeat(80));
+
+        for (rank, (doc_id, score)) in results.iter().enumerate() {
+            if let Some(doc) = index_data.documents.get(*doc_id) {
+                println!("[{}] {}", rank + 1, doc.title);
+                println!("    Score: {:.4}", score);
+                println!("{}", "-".repeat(80));
+            }
+        }
     } else {
         println!("Unknown command: {command}");
         println!("Usage:");
