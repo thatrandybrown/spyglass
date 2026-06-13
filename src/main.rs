@@ -45,7 +45,6 @@ struct IndexedDocument {
     content: String,
     tokens: Vec<String>,
     raw_tf: HashMap<String, usize>,
-    tf: HashMap<String, f64>,
 }
 
 #[derive(Debug, Deserialize)]
