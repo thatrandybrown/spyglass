@@ -6,6 +6,24 @@ use std::fs;
 use std::path::Path;
 use std::sync::OnceLock;
 
+#[derive(Debug, Deserialize)]
+struct IndexedDocument {
+    id: usize,
+    title: String,
+    content: String,
+    tokens: Vec<String>,
+    raw_tf: HashMap<String, usize>,
+}
+
+#[derive(Debug, Deserialize)]
+struct IndexData {
+    inverted_index: HashMap<String, Vec<usize>>,
+    document_frequency: HashMap<String, usize>,
+    total_docs: usize,
+    documents: Vec<IndexedDocument>,
+    last_updated: f64,
+}
+
 const STOPWORDS: &[&str] = &[
     "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "he",
     "in", "is", "it", "its", "of", "on", "that", "the", "to", "was", "will", "with",
@@ -36,24 +54,6 @@ fn tokenize(text: &str, remove_stops: bool) -> Vec<String> {
     } else {
         tokens
     }
-}
-
-#[derive(Debug, Deserialize)]
-struct IndexedDocument {
-    id: usize,
-    title: String,
-    content: String,
-    tokens: Vec<String>,
-    raw_tf: HashMap<String, usize>,
-}
-
-#[derive(Debug, Deserialize)]
-struct IndexData {
-    inverted_index: HashMap<String, Vec<usize>>,
-    document_frequency: HashMap<String, usize>,
-    total_docs: usize,
-    documents: Vec<IndexedDocument>,
-    last_updated: f64,
 }
 
 fn compute_bm25_score(
