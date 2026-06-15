@@ -189,6 +189,13 @@ fn query_documents_with_index(query_text: &str, index_data: &IndexData) -> Vec<(
     results
 }
 
+fn is_file_already_indexed(index_data: &IndexData, filepath: &str) -> bool {
+    index_data
+        .documents
+        .iter()
+        .any(|doc| doc.title == filepath)
+}
+
 fn load_index_from_disk<T: DeserializeOwned>(
     index_path: &str,
 ) -> Result<T, Box<dyn std::error::Error>> {
