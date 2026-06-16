@@ -196,6 +196,10 @@ fn is_file_already_indexed(index_data: &IndexData, filepath: &str) -> bool {
         .any(|doc| doc.title == filepath)
 }
 
+fn read_document(file_path: &str) -> Result<String, Box<dyn std::error::Error>> {
+    Ok(fs::read_to_string(file_path)?)
+}
+
 fn load_index_from_disk<T: DeserializeOwned>(
     index_path: &str,
 ) -> Result<T, Box<dyn std::error::Error>> {
