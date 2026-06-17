@@ -56,6 +56,14 @@ fn tokenize(text: &str, remove_stops: bool) -> Vec<String> {
     }
 }
 
+fn build_raw_tf(tokens: &[String]) -> HashMap<String, usize> {
+    let mut raw_tf: HashMap<String, usize> = HashMap::new();
+    for token in tokens {
+        *raw_tf.entry(token.clone()).or_insert(0) += 1;
+    }
+    raw_tf
+}
+
 fn compute_bm25_score(
     query_words: &[String],
     doc_tf: &HashMap<String, usize>,
