@@ -208,6 +208,27 @@ fn read_document(file_path: &str) -> Result<String, Box<dyn std::error::Error>> 
     Ok(fs::read_to_string(file_path)?)
 }
 
+fn add_document(index_data: &mut IndexData, title: &str, content: &str) {
+    if is_file_already_indexed(index_data, title) {
+        println!("File '{}' already indexed, skipping", title);
+        return;
+    }
+
+    let doc_id = index_data.documents.len();
+    let tokens = tokenize(content, true);
+    let raw_tf = build_raw_tf(&tokens);
+
+    index_data.documents.push(IndexedDocument {
+        id: doc_id,
+        title: title.to_string(),
+        content: content.to_string(),
+        tokens,
+        raw_tf,
+    });
+
+    println!("Added document '{}' with ID {}", title, doc_id);
+}
+
 fn load_index_from_disk<T: DeserializeOwned>(
     index_path: &str,
 ) -> Result<T, Box<dyn std::error::Error>> {
