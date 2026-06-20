@@ -229,6 +229,20 @@ fn add_document(index_data: &mut IndexData, title: &str, content: &str) {
     println!("Added document '{}' with ID {}", title, doc_id);
 }
 
+fn build_inverted_index(index_data: &IndexData) -> HashMap<String, Vec<usize>> {
+    let mut inverted_index: HashMap<String, Vec<usize>> = HashMap::new();
+    for doc in &index_data.documents {
+        let unique_terms: HashSet<&str> = doc.tokens.iter().map(|t| t.as_str()).collect();
+        for term in unique_terms {
+            inverted_index
+                .entry(term.to_string())
+                .or_insert_with(Vec::new)
+                .push(doc.id);
+        }
+    }
+    inverted_index
+}
+
 fn load_index_from_disk<T: DeserializeOwned>(
     index_path: &str,
 ) -> Result<T, Box<dyn std::error::Error>> {
