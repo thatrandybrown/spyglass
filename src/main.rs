@@ -243,6 +243,17 @@ fn build_inverted_index(index_data: &IndexData) -> HashMap<String, Vec<usize>> {
     inverted_index
 }
 
+fn compute_document_frequency(index_data: &IndexData) -> HashMap<String, usize> {
+    let mut df: HashMap<String, usize> = HashMap::new();
+    for doc in &index_data.documents {
+        let unique_terms: HashSet<&str> = doc.tokens.iter().map(|t| t.as_str()).collect();
+        for term in unique_terms {
+            *df.entry(term.to_string()).or_insert(0) += 1;
+        }
+    }
+    df
+}
+
 fn load_index_from_disk<T: DeserializeOwned>(
     index_path: &str,
 ) -> Result<T, Box<dyn std::error::Error>> {
