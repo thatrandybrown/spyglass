@@ -1,12 +1,12 @@
 use serde::de::DeserializeOwned;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
 use std::sync::OnceLock;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct IndexedDocument {
     id: usize,
     title: String,
@@ -15,7 +15,7 @@ struct IndexedDocument {
     raw_tf: HashMap<String, usize>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct IndexData {
     inverted_index: HashMap<String, Vec<usize>>,
     document_frequency: HashMap<String, usize>,
