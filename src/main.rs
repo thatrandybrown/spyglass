@@ -254,6 +254,22 @@ fn compute_document_frequency(index_data: &IndexData) -> HashMap<String, usize> 
     df
 }
 
+fn save_index_to_disk(index_data: &mut IndexData, index_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    index_data.inverted_index = build_inverted_index(index_data);
+    index_data.document_frequency = compute_document_frequency(index_data);
+    index_data.total_docs = index_data.documents.len();
+
+    let json = serde_json::to_string_pretty(index_data)?;
+    fs::write(index_path, json)?;
+    println!(
+        "Index and {} documents saved to {}",
+        index_data.documents.len(),
+        index_path
+    );
+
+    Ok(())
+}
+
 fn load_index_from_disk<T: DeserializeOwned>(
     index_path: &str,
 ) -> Result<T, Box<dyn std::error::Error>> {
