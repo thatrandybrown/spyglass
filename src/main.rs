@@ -287,7 +287,7 @@ fn load_index_from_disk<T: DeserializeOwned>(
 }
 
 fn main() {
-    let index_data = match load_index_from_disk::<IndexData>("index.json") {
+    let mut index_data = match load_index_from_disk::<IndexData>("index.json") {
         Ok(index_data) => {
             println!(
                 "Index loaded from index.json: total_docs={}, documents={}, terms={}",
@@ -305,7 +305,17 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let command = args[1..].join(" ").trim().to_string();
 
-    if let Some(query_text) = command.strip_prefix("query ") {
+    if let Some(filepath) = command.strip_prefix("add ") {
+        match read_document(filepath) {
+            Ok(content) => {
+                add_document(&mut index_data, filepath, &content);
+                if let Err(err) = save_index_to_disk(&mut index_data, "index.json") {
+                    eprintln!("Failed to save index.json: {}", err);
+                }
+            }
+            Err(err) => eprintln!("Error indexing {}: {}", filepath, err),
+        }
+    } else if let Some(query_text) = command.strip_prefix("query ") {
         let results = query_documents_with_index(query_text, &index_data);
 
         if results.is_empty() {
@@ -330,6 +340,7 @@ fn main() {
     } else {
         println!("Unknown command: {command}");
         println!("Usage:");
+        println!("  cargo run -- add <filepath>");
         println!("  cargo run -- query <search terms>");
     }
 }
