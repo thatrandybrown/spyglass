@@ -5,6 +5,7 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
 use std::sync::OnceLock;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Debug, Deserialize, Serialize)]
 struct IndexedDocument {
@@ -258,6 +259,7 @@ fn save_index_to_disk(index_data: &mut IndexData, index_path: &str) -> Result<()
     index_data.inverted_index = build_inverted_index(index_data);
     index_data.document_frequency = compute_document_frequency(index_data);
     index_data.total_docs = index_data.documents.len();
+    index_data.last_updated = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs_f64();
 
     let json = serde_json::to_string_pretty(index_data)?;
     fs::write(index_path, json)?;
