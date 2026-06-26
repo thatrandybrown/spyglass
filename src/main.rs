@@ -305,7 +305,7 @@ fn main() {
         }
     };
     let args: Vec<String> = std::env::args().collect();
-    let command = args[1..].join(" ").trim().to_string();
+    let command = args.get(1..).unwrap_or(&[]).join(" ").trim().to_string();
 
     if let Some(filepath) = command.strip_prefix("add ") {
         match read_document(filepath) {
