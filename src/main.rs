@@ -300,8 +300,19 @@ fn main() {
             index_data
         }
         Err(err) => {
-            eprintln!("Failed to load index.json: {}", err);
-            return;
+            if !Path::new("index.json").exists() {
+                println!("Starting with empty index (index.json not found)");
+                IndexData {
+                    inverted_index: HashMap::new(),
+                    document_frequency: HashMap::new(),
+                    total_docs: 0,
+                    documents: Vec::new(),
+                    last_updated: 0.0,
+                }
+            } else {
+                eprintln!("Failed to load index.json: {}", err);
+                return;
+            }
         }
     };
     let args: Vec<String> = std::env::args().collect();
