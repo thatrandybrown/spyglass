@@ -325,6 +325,7 @@ fn main() {
                 if let Err(err) = save_index_to_disk(&mut index_data, "index.json") {
                     eprintln!("Failed to save index.json: {}", err);
                 }
+                println!("Total documents: {}", index_data.documents.len());
             }
             Err(err) => eprintln!("Error indexing {}: {}", filepath, err),
         }
