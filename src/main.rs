@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -228,6 +228,72 @@ fn add_document(index_data: &mut IndexData, title: &str, content: &str) {
     });
 
     println!("Added document '{}' with ID {}", title, doc_id);
+}
+
+fn batch_index_directory(index_data: &mut IndexData, directory_path: &str) -> (usize, usize) {
+    const DEFAULT_EXTENSIONS: &[&str] = &[".txt", ".md", ".html", ".py", ".js", ".json"];
+
+    let mut indexed_count = 0usize;
+    let mut skipped_count = 0usize;
+    let mut directories = vec![PathBuf::from(directory_path)];
+
+    while let Some(directory) = directories.pop() {
+        let entries = match fs::read_dir(&directory) {
+            Ok(entries) => entries,
+            Err(err) => {
+                println!("Error indexing {}: {}", directory.display(), err);
+                continue;
+            }
+        };
+
+        for entry in entries {
+            let entry = match entry {
+                Ok(entry) => entry,
+                Err(err) => {
+                    println!("Error indexing {}: {}", directory.display(), err);
+                    continue;
+                }
+            };
+
+            let path = entry.path();
+            if path.is_dir() {
+                directories.push(path);
+                continue;
+            }
+
+            if !path.is_file() {
+                continue;
+            }
+
+            let lower_name = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or_default()
+                .to_lowercase();
+            if !DEFAULT_EXTENSIONS.iter().any(|ext| lower_name.ends_with(ext)) {
+                continue;
+            }
+
+            let filepath = path.to_string_lossy().to_string();
+            if !is_file_already_indexed(index_data, &filepath) {
+                match read_document(&filepath) {
+                    Ok(content) => {
+                        add_document(index_data, &filepath, &content);
+                        indexed_count += 1;
+                    }
+                    Err(err) => println!("Error indexing {}: {}", filepath, err),
+                }
+            } else {
+                skipped_count += 1;
+            }
+        }
+    }
+
+    println!(
+        "Batch indexing complete: {} files indexed, {} skipped",
+        indexed_count, skipped_count
+    );
+    (indexed_count, skipped_count)
 }
 
 fn build_inverted_index(index_data: &IndexData) -> HashMap<String, Vec<usize>> {
