@@ -395,6 +395,12 @@ fn main() {
             }
             Err(err) => eprintln!("Error indexing {}: {}", filepath, err),
         }
+    } else if let Some(directory_path) = command.strip_prefix("batch ") {
+        batch_index_directory(&mut index_data, directory_path);
+        if let Err(err) = save_index_to_disk(&mut index_data, "index.json") {
+            eprintln!("Failed to save index.json: {}", err);
+        }
+        println!("Total documents: {}", index_data.documents.len());
     } else if let Some(query_text) = command.strip_prefix("query ") {
         let results = query_documents_with_index(query_text, &index_data);
 
@@ -421,6 +427,7 @@ fn main() {
         println!("Unknown command: {command}");
         println!("Usage:");
         println!("  cargo run -- add <filepath>");
+        println!("  cargo run -- batch <directory>");
         println!("  cargo run -- query <search terms>");
     }
 }
