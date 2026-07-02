@@ -423,6 +423,23 @@ fn main() {
                 println!("{}", "-".repeat(80));
             }
         }
+    } else if command == "reindex" {
+        println!("Reindexing all documents...");
+        let existing_docs: Vec<(String, String)> = index_data
+            .documents
+            .iter()
+            .map(|doc| (doc.title.clone(), doc.content.clone()))
+            .collect();
+
+        index_data.documents.clear();
+        for (title, content) in existing_docs {
+            add_document(&mut index_data, &title, &content);
+        }
+
+        if let Err(err) = save_index_to_disk(&mut index_data, "index.json") {
+            eprintln!("Failed to save index.json: {}", err);
+        }
+        println!("Total documents: {}", index_data.documents.len());
     } else {
         println!("Unknown command: {command}");
         println!("Usage:");
