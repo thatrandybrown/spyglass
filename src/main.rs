@@ -447,4 +447,11 @@ fn main() {
         println!("  cargo run -- batch <directory>");
         println!("  cargo run -- query <search terms>");
     }
+
+    if !index_data.documents.is_empty() {
+        if let Err(err) = save_index_to_disk(&mut index_data, "index.json") {
+            eprintln!("Failed to save index.json: {}", err);
+        }
+        println!("Index saved automatically on exit");
+    }
 }
