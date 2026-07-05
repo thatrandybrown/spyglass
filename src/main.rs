@@ -198,6 +198,27 @@ fn query_documents_with_index(query_text: &str, index_data: &IndexData) -> Vec<(
     results
 }
 
+fn format_search_results(results: &[(usize, f64)], query_words: &[String], index_data: &IndexData) {
+    if results.is_empty() {
+        println!("\nNo documents found matching your query.\n");
+        return;
+    }
+
+    println!("\n{}", "=".repeat(80));
+    println!("Found {} result(s)", results.len());
+    println!("{}\n", "=".repeat(80));
+
+    for (rank, (doc_id, score)) in results.iter().enumerate() {
+        if let Some(doc) = index_data.documents.get(*doc_id) {
+            let snippet = extract_snippet(&doc.content, query_words, 2);
+            println!("[{}] {}", rank + 1, doc.title);
+            println!("    Score: {:.4}", score);
+            println!("    {}", snippet);
+            println!("{}", "-".repeat(80));
+        }
+    }
+}
+
 fn is_file_already_indexed(index_data: &IndexData, filepath: &str) -> bool {
     index_data
         .documents
