@@ -424,26 +424,8 @@ fn main() {
         println!("Total documents: {}", index_data.documents.len());
     } else if let Some(query_text) = command.strip_prefix("query ") {
         let results = query_documents_with_index(query_text, &index_data);
-
-        if results.is_empty() {
-            println!("\nNo documents found matching your query.\n");
-            return;
-        }
-
-        println!("\n{}", "=".repeat(80));
-        println!("Found {} result(s)", results.len());
-        println!("{}\n", "=".repeat(80));
-
         let query_words = tokenize(query_text, true);
-        for (rank, (doc_id, score)) in results.iter().enumerate() {
-            if let Some(doc) = index_data.documents.get(*doc_id) {
-                let snippet = extract_snippet(&doc.content, &query_words, 2);
-                println!("[{}] {}", rank + 1, doc.title);
-                println!("    Score: {:.4}", score);
-                println!("    {}", snippet);
-                println!("{}", "-".repeat(80));
-            }
-        }
+        format_search_results(&results, &query_words, &index_data);
     } else if command == "reindex" {
         println!("Reindexing all documents...");
         let existing_docs: Vec<(String, String)> = index_data
