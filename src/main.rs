@@ -198,14 +198,16 @@ fn query_documents_with_index(query_text: &str, index_data: &IndexData) -> Vec<(
     results
 }
 
-fn format_search_results(results: &[(usize, f64)], query_words: &[String], index_data: &IndexData) {
+fn format_search_results(results: &[(usize, f64)], query_words: &[String], index_data: &IndexData, limit: usize) {
     if results.is_empty() {
         println!("\nNo documents found matching your query.\n");
         return;
     }
 
+    let results = &results[..results.len().min(limit)];
+
     println!("\n{}", "=".repeat(80));
-    println!("Found {} result(s)", results.len());
+    println!("Found {} result(s) (showing top {})", results.len(), limit);
     println!("{}\n", "=".repeat(80));
 
     for (rank, (doc_id, score)) in results.iter().enumerate() {
@@ -419,7 +421,7 @@ fn main() {
     } else if let Some(query_text) = command.strip_prefix("query ") {
         let results = query_documents_with_index(query_text, &index_data);
         let query_words = tokenize(query_text, true);
-        format_search_results(&results, &query_words, &index_data);
+        format_search_results(&results, &query_words, &index_data, 10);
     } else if command == "reindex" {
         println!("Reindexing all documents...");
         let existing_docs: Vec<(String, String)> = index_data
