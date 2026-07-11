@@ -377,6 +377,36 @@ fn load_index_from_disk<T: DeserializeOwned>(
     Ok(index_data)
 }
 
+fn extract_flag(args: &[String], flag: &str) -> Option<String> {
+    for (i, arg) in args.iter().enumerate() {
+        if arg == flag && i + 1 < args.len() {
+            return Some(args[i + 1].clone());
+        }
+    }
+    None
+}
+
+fn remove_flags(args: Vec<String>) -> Vec<String> {
+    let mut result = Vec::new();
+    let mut skip_next = false;
+
+    for arg in args.iter() {
+        if skip_next {
+            skip_next = false;
+            continue;
+        }
+
+        if arg == "--index" || arg == "--limit" {
+            skip_next = true;
+            continue;
+        }
+
+        result.push(arg.clone());
+    }
+
+    result
+}
+
 fn main() {
     let mut index_data = match load_index_from_disk::<IndexData>("index.json") {
         Ok(index_data) => {
