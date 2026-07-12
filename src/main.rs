@@ -408,10 +408,21 @@ fn remove_flags(args: Vec<String>) -> Vec<String> {
 }
 
 fn main() {
-    let mut index_data = match load_index_from_disk::<IndexData>("index.json") {
+    let args: Vec<String> = std::env::args().collect();
+
+    // Extract flags
+    let index_path = extract_flag(&args, "--index").unwrap_or_else(|| "index.json".to_string());
+    let limit_str = extract_flag(&args, "--limit").unwrap_or_else(|| "10".to_string());
+    let limit: usize = limit_str.parse().unwrap_or(10);
+
+    // Remove flags from args for command parsing
+    let clean_args = remove_flags(args);
+
+    let mut index_data = match load_index_from_disk::<IndexData>(&index_path) {
         Ok(index_data) => {
             println!(
-                "Index loaded from index.json: total_docs={}, documents={}, terms={}",
+                "Index loaded from {}: total_docs={}, documents={}, terms={}",
+                index_path,
                 index_data.total_docs,
                 index_data.documents.len(),
                 index_data.inverted_index.len()
@@ -419,8 +430,8 @@ fn main() {
             index_data
         }
         Err(err) => {
-            if !Path::new("index.json").exists() {
-                println!("Starting with empty index (index.json not found)");
+            if !Path::new(&index_path).exists() {
+                println!("Starting with empty index ({} not found)", index_path);
                 IndexData {
                     inverted_index: HashMap::new(),
                     document_frequency: HashMap::new(),
@@ -429,13 +440,13 @@ fn main() {
                     last_updated: 0.0,
                 }
             } else {
-                eprintln!("Failed to load index.json: {}", err);
+                eprintln!("Failed to load {}: {}", index_path, err);
                 return;
             }
         }
     };
-    let args: Vec<String> = std::env::args().collect();
-    let command = args.get(1..).unwrap_or(&[]).join(" ").trim().to_string();
+
+    let command = clean_args.get(1..).unwrap_or(&[]).join(" ").trim().to_string();
 
     if let Some(filepath) = command.strip_prefix("add ") {
         match read_document(filepath) {
@@ -451,7 +462,7 @@ fn main() {
     } else if let Some(query_text) = command.strip_prefix("query ") {
         let results = query_documents_with_index(query_text, &index_data);
         let query_words = tokenize(query_text, true);
-        format_search_results(&results, &query_words, &index_data, 10);
+        format_search_results(&results, &query_words, &index_data, limit);
     } else if command == "reindex" {
         println!("Reindexing all documents...");
         let existing_docs: Vec<(String, String)> = index_data
