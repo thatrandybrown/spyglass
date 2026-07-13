@@ -476,8 +476,8 @@ fn main() {
             add_document(&mut index_data, &title, &content);
         }
 
-        if let Err(err) = save_index_to_disk(&mut index_data, "index.json") {
-            eprintln!("Failed to save index.json: {}", err);
+        if let Err(err) = save_index_to_disk(&mut index_data, &index_path) {
+            eprintln!("Failed to save {}: {}", index_path, err);
         }
         println!("Total documents: {}", index_data.documents.len());
     } else {
@@ -489,8 +489,8 @@ fn main() {
     }
 
     if !index_data.documents.is_empty() {
-        if let Err(err) = save_index_to_disk(&mut index_data, "index.json") {
-            eprintln!("Failed to save index.json: {}", err);
+        if let Err(err) = save_index_to_disk(&mut index_data, &index_path) {
+            eprintln!("Failed to save {}: {}", index_path, err);
         }
         println!("Index saved automatically on exit");
     }
