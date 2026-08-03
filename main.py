@@ -186,13 +186,22 @@ def query_documents(query_text):
     results.sort(key=lambda x: x[2], reverse=True)
     return results
 
-def query_documents_with_index(query_text):
+def query_documents_with_index(query_text, index_data=None):
     """Query using inverted index for efficiency"""
     query_words = tokenize(query_text)
     if not query_words:
         return []
 
-    inverted_index = build_inverted_index()
+    # Prefer precomputed index data loaded from disk; fallback to rebuilding if unavailable.
+    if index_data and "inverted_index" in index_data and "document_frequency" in index_data:
+        inverted_index = index_data["inverted_index"]
+        df = index_data["document_frequency"]
+        total_docs = index_data.get("total_docs", len(documents))
+    else:
+        inverted_index = build_inverted_index()
+        df = compute_document_frequency()
+        total_docs = len(documents)
+
     candidate_doc_ids = set()
 
     for word in query_words:
