@@ -315,7 +315,7 @@ def format_search_results(results, query_words):
 
 if __name__ == "__main__":
     # Try to load existing index on startup
-    load_index_from_disk()
+    loaded_index_data = load_index_from_disk()
 
     command = " ".join(sys.argv[1:]).strip()
 
