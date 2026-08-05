@@ -329,7 +329,7 @@ if __name__ == "__main__":
         print(f"Total documents: {len(documents)}")
     elif command.startswith("query "):
         query_text = command.split(" ", 1)[1]
-        results = query_documents_with_index(query_text)  # Use the indexed version
+        results = query_documents_with_index(query_text, loaded_index_data)  # Use precomputed index when available
         query_words = tokenize(query_text)
         format_search_results(results, query_words)
     elif command == "reindex":
