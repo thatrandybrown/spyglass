@@ -212,9 +212,6 @@ def query_documents_with_index(query_text, index_data=None):
         return []
 
     results = []
-    df = compute_document_frequency()
-    total_docs = len(documents)
-    query_vector = compute_query_vector(query_words, df, total_docs)
 
     for doc_id in candidate_doc_ids:
         doc = documents[doc_id]
