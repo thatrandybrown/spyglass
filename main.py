@@ -313,16 +313,20 @@ def format_search_results(results, query_words):
 if __name__ == "__main__":
     # Try to load existing index on startup
     loaded_index_data = load_index_from_disk()
+    did_mutate = False
 
     command = " ".join(sys.argv[1:]).strip()
 
     if command.startswith("add "):
         filepath = command.split(" ", 1)[1]
         add_document(filepath, read_document(filepath))
+        did_mutate = True
         print(f"Total documents: {len(documents)}")
     elif command.startswith("batch "): # maybe index?
         directory_path = command.split(" ", 1)[1]
+        before_count = len(documents)
         batch_index_directory(directory_path)
+        did_mutate = len(documents) != before_count
         print(f"Total documents: {len(documents)}")
     elif command.startswith("query "):
         query_text = command.split(" ", 1)[1]
@@ -337,7 +341,7 @@ if __name__ == "__main__":
         documents = []
         for doc in existing_docs:
             add_document(doc["title"], doc["content"])
-        save_index_to_disk()
+        did_mutate = True
         print(f"Total documents: {len(documents)}")
     else:
         print(f"Unknown command: {command}")
@@ -346,6 +350,6 @@ if __name__ == "__main__":
         print("  python main.py batch <directory>")
         print("  python main.py query <search terms>")
 
-    if documents:
+    if did_mutate:
         save_index_to_disk()
         print("Index saved automatically on exit")
