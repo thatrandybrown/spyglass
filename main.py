@@ -152,6 +152,7 @@ def add_document(title, content):
         "tf": tf
     })
     print(f"Added document '{title}' with ID {doc_id}")
+    return True
 
 def batch_index_directory(directory_path, extensions=None):
     """Index all files in a directory with specified extensions"""
