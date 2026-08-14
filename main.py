@@ -167,9 +167,8 @@ def batch_index_directory(directory_path, extensions=None):
             if any(file.lower().endswith(ext) for ext in extensions):
                 filepath = os.path.join(root, file)
                 try:
-                    if not is_file_already_indexed(filepath):
-                        content = read_document(filepath)
-                        add_document(filepath, content)
+                    content = read_document(filepath)
+                    if add_document(filepath, content):
                         indexed_count += 1
                     else:
                         skipped_count += 1
