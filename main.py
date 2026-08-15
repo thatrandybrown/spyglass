@@ -335,9 +335,8 @@ if __name__ == "__main__":
         print(f"Total documents: {len(documents)}")
     elif command.startswith("batch "): # maybe index?
         directory_path = command.split(" ", 1)[1]
-        before_count = len(documents)
-        batch_index_directory(directory_path)
-        did_mutate = len(documents) != before_count
+        indexed_count, _ = batch_index_directory(directory_path)
+        did_mutate = indexed_count > 0
         print(f"Total documents: {len(documents)}")
     elif command.startswith("query "):
         query_text = command.split(" ", 1)[1]
