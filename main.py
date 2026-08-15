@@ -331,8 +331,7 @@ if __name__ == "__main__":
 
     if command.startswith("add "):
         filepath = command.split(" ", 1)[1]
-        add_document(filepath, read_document(filepath))
-        did_mutate = True
+        did_mutate = add_document(filepath, read_document(filepath))
         print(f"Total documents: {len(documents)}")
     elif command.startswith("batch "): # maybe index?
         directory_path = command.split(" ", 1)[1]
