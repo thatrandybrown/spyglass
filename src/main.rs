@@ -221,21 +221,24 @@ fn format_search_results(results: &[(usize, f64)], query_words: &[String], index
     }
 }
 
-fn is_file_already_indexed(index_data: &IndexData, filepath: &str) -> bool {
-    index_data
-        .documents
-        .iter()
-        .any(|doc| doc.title == filepath)
-}
-
 fn read_document(file_path: &str) -> Result<String, Box<dyn std::error::Error>> {
     Ok(fs::read_to_string(file_path)?)
 }
 
-fn add_document(index_data: &mut IndexData, title: &str, content: &str) {
-    if is_file_already_indexed(index_data, title) {
-        println!("File '{}' already indexed, skipping", title);
-        return;
+fn add_document(index_data: &mut IndexData, title: &str, content: &str) -> bool {
+    if let Some(existing_doc) = index_data.documents.iter_mut().find(|doc| doc.title == title) {
+        if existing_doc.content == content {
+            println!("File '{}' unchanged, skipping", title);
+            return false;
+        }
+
+        let tokens = tokenize(content, true);
+        let raw_tf = build_raw_tf(&tokens);
+        existing_doc.content = content.to_string();
+        existing_doc.tokens = tokens;
+        existing_doc.raw_tf = raw_tf;
+        println!("Updated document '{}' with ID {}", title, existing_doc.id);
+        return true;
     }
 
     let doc_id = index_data.documents.len();
@@ -251,6 +254,7 @@ fn add_document(index_data: &mut IndexData, title: &str, content: &str) {
     });
 
     println!("Added document '{}' with ID {}", title, doc_id);
+    true
 }
 
 fn batch_index_directory(index_data: &mut IndexData, directory_path: &str) -> (usize, usize) {
