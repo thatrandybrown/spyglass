@@ -302,16 +302,15 @@ fn batch_index_directory(index_data: &mut IndexData, directory_path: &str) -> (u
             }
 
             let filepath = path.to_string_lossy().to_string();
-            if !is_file_already_indexed(index_data, &filepath) {
-                match read_document(&filepath) {
-                    Ok(content) => {
-                        add_document(index_data, &filepath, &content);
+            match read_document(&filepath) {
+                Ok(content) => {
+                    if add_document(index_data, &filepath, &content) {
                         indexed_count += 1;
+                    } else {
+                        skipped_count += 1;
                     }
-                    Err(err) => println!("Error indexing {}: {}", filepath, err),
                 }
-            } else {
-                skipped_count += 1;
+                Err(err) => println!("Error indexing {}: {}", filepath, err),
             }
         }
     }
