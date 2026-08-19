@@ -450,6 +450,7 @@ fn main() {
     };
 
     let command = clean_args.get(1..).unwrap_or(&[]).join(" ").trim().to_string();
+    let mut did_mutate = false;
 
     if let Some(filepath) = command.strip_prefix("add ") {
         match read_document(filepath) {
