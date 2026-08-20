@@ -455,13 +455,14 @@ fn main() {
     if let Some(filepath) = command.strip_prefix("add ") {
         match read_document(filepath) {
             Ok(content) => {
-                add_document(&mut index_data, filepath, &content);
+                did_mutate = add_document(&mut index_data, filepath, &content);
                 println!("Total documents: {}", index_data.documents.len());
             }
             Err(err) => eprintln!("Error indexing {}: {}", filepath, err),
         }
     } else if let Some(directory_path) = command.strip_prefix("batch ") {
-        batch_index_directory(&mut index_data, directory_path);
+        let (indexed_count, _) = batch_index_directory(&mut index_data, directory_path);
+        did_mutate = indexed_count > 0;
         println!("Total documents: {}", index_data.documents.len());
     } else if let Some(query_text) = command.strip_prefix("query ") {
         let results = query_documents_with_index(query_text, &index_data);
@@ -479,10 +480,7 @@ fn main() {
         for (title, content) in existing_docs {
             add_document(&mut index_data, &title, &content);
         }
-
-        if let Err(err) = save_index_to_disk(&mut index_data, &index_path) {
-            eprintln!("Failed to save {}: {}", index_path, err);
-        }
+        did_mutate = true;
         println!("Total documents: {}", index_data.documents.len());
     } else {
         println!("Unknown command: {command}");
