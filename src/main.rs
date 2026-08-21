@@ -490,7 +490,7 @@ fn main() {
         println!("  cargo run -- query <search terms>");
     }
 
-    if !index_data.documents.is_empty() {
+    if did_mutate {
         if let Err(err) = save_index_to_disk(&mut index_data, &index_path) {
             eprintln!("Failed to save {}: {}", index_path, err);
         }
