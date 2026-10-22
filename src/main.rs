@@ -1,3 +1,5 @@
+mod graph;
+
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use regex::Regex;
