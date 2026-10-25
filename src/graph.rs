@@ -1,4 +1,6 @@
 use serde::{Deserialize, Serialize};
+use std::fs;
+use std::path::Path;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Entity {
@@ -23,9 +25,28 @@ impl Graph {
     }
 }
 
+pub fn load_graph(path: &str) -> Result<Graph, Box<dyn std::error::Error>> {
+    if !Path::new(path).exists() {
+        return Ok(Graph::new());
+    }
+
+    let file_contents = fs::read_to_string(path)?;
+    let graph: Graph = serde_json::from_str(&file_contents)?;
+
+    Ok(graph)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn load_graph_missing_path_is_empty() {
+        let graph = load_graph("does-not-exist.json").unwrap();
+
+        assert_eq!(graph.version, 1);
+        assert!(graph.entities.is_empty());
+    }
 
     #[test]
     fn graph_round_trip() {
