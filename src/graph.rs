@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct Entity {
     pub id: String,
     pub name: String,
@@ -10,7 +10,7 @@ pub struct Entity {
     pub aliases: Vec<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct Graph {
     pub version: u32,
     pub entities: Vec<Entity>,
@@ -36,9 +36,36 @@ pub fn load_graph(path: &str) -> Result<Graph, Box<dyn std::error::Error>> {
     Ok(graph)
 }
 
+pub fn save_graph(graph: &Graph, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let json = serde_json::to_string_pretty(graph)?;
+    fs::write(path, json)?;
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn save_then_load_graph_is_equal() {
+        let path = std::env::temp_dir().join("trb_spyglass_save_graph_test.json");
+        let path = path.to_str().unwrap();
+
+        let mut graph = Graph::new();
+        graph.entities.push(Entity {
+            id: "prince-lucas".to_string(),
+            name: "Prince Lucas".to_string(),
+            kind: "person".to_string(),
+            aliases: vec!["Lucas".to_string()],
+        });
+
+        save_graph(&graph, path).unwrap();
+        let loaded = load_graph(path).unwrap();
+        fs::remove_file(path).unwrap();
+
+        assert_eq!(loaded, graph);
+    }
 
     #[test]
     fn load_graph_missing_path_is_empty() {
