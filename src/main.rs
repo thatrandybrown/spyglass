@@ -401,7 +401,7 @@ fn remove_flags(args: Vec<String>) -> Vec<String> {
             continue;
         }
 
-        if arg == "--index" || arg == "--limit" {
+        if arg == "--index" || arg == "--limit" || arg == "--graph" {
             skip_next = true;
             continue;
         }
@@ -419,6 +419,7 @@ fn main() {
     let index_path = extract_flag(&args, "--index").unwrap_or_else(|| "index.json".to_string());
     let limit_str = extract_flag(&args, "--limit").unwrap_or_else(|| "10".to_string());
     let limit: usize = limit_str.parse().unwrap_or(10);
+    let graph_path = extract_flag(&args, "--graph").unwrap_or_else(|| "graph.json".to_string());
 
     // Remove flags from args for command parsing
     let clean_args = remove_flags(args);
