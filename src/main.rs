@@ -485,12 +485,18 @@ fn main() {
         }
         did_mutate = true;
         println!("Total documents: {}", index_data.documents.len());
+    } else if command == "graph show" {
+        match graph::load_graph(&graph_path) {
+            Ok(graph) => println!("{} entities", graph.entities.len()),
+            Err(err) => eprintln!("Failed to load {}: {}", graph_path, err),
+        }
     } else {
         println!("Unknown command: {command}");
         println!("Usage:");
         println!("  cargo run -- add <filepath>");
         println!("  cargo run -- batch <directory>");
         println!("  cargo run -- query <search terms>");
+        println!("  cargo run -- graph show");
     }
 
     if did_mutate {
