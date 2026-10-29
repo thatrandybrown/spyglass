@@ -43,9 +43,24 @@ pub fn save_graph(graph: &Graph, path: &str) -> Result<(), Box<dyn std::error::E
     Ok(())
 }
 
+pub fn slugify(name: &str) -> String {
+    name.to_lowercase()
+        .split(|c: char| !c.is_alphanumeric())
+        .filter(|part| !part.is_empty())
+        .collect::<Vec<&str>>()
+        .join("-")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn slugify_handles_spaces_case_and_punctuation() {
+        assert_eq!(slugify("Prince Lucas"), "prince-lucas");
+        assert_eq!(slugify("  Prince   LUCAS  "), "prince-lucas");
+        assert_eq!(slugify("St. John's, Inc."), "st-john-s-inc");
+    }
 
     #[test]
     fn save_then_load_graph_is_equal() {
