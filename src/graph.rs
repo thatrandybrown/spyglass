@@ -25,6 +25,21 @@ impl Graph {
             entities: Vec::new(),
         }
     }
+
+    pub fn add_entity(&mut self, kind: &str, name: &str) -> bool {
+        let id = slugify(name);
+        if !ENTITY_KINDS.contains(&kind) || self.entities.iter().any(|e| e.id == id) {
+            return false;
+        }
+
+        self.entities.push(Entity {
+            id,
+            name: name.to_string(),
+            kind: kind.to_string(),
+            aliases: Vec::new(),
+        });
+        true
+    }
 }
 
 pub fn load_graph(path: &str) -> Result<Graph, Box<dyn std::error::Error>> {
@@ -56,6 +71,17 @@ pub fn slugify(name: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn add_entity_rejects_duplicates_and_unknown_kinds() {
+        let mut graph = Graph::new();
+
+        assert!(graph.add_entity("person", "Prince Lucas"));
+        assert_eq!(graph.entities[0].id, "prince-lucas");
+        assert!(!graph.add_entity("place", "prince lucas"));
+        assert!(!graph.add_entity("spaceship", "Someone Else"));
+        assert_eq!(graph.entities.len(), 1);
+    }
 
     #[test]
     fn slugify_handles_spaces_case_and_punctuation() {
