@@ -485,6 +485,23 @@ fn main() {
         }
         did_mutate = true;
         println!("Total documents: {}", index_data.documents.len());
+    } else if let Some(entity) = command.strip_prefix("graph add ") {
+        let Some((kind, name)) = entity.split_once(' ') else {
+            eprintln!("Usage: cargo run -- graph add <kind> <name>");
+            return;
+        };
+        match graph::load_graph(&graph_path) {
+            Ok(mut graph) => {
+                if !graph.add_entity(kind, name) {
+                    println!("Skipped {name}: duplicate or unknown kind");
+                } else if let Err(err) = graph::save_graph(&graph, &graph_path) {
+                    eprintln!("Failed to save {}: {}", graph_path, err);
+                } else {
+                    println!("Added {name}");
+                }
+            }
+            Err(err) => eprintln!("Failed to load {}: {}", graph_path, err),
+        }
     } else if command == "graph show" {
         match graph::load_graph(&graph_path) {
             Ok(graph) => println!("{} entities", graph.entities.len()),
@@ -497,6 +514,7 @@ fn main() {
         println!("  cargo run -- batch <directory>");
         println!("  cargo run -- query <search terms>");
         println!("  cargo run -- graph show");
+        println!("  cargo run -- graph add <kind> <name>");
     }
 
     if did_mutate {
