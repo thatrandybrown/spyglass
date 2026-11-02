@@ -504,7 +504,14 @@ fn main() {
         }
     } else if command == "graph show" {
         match graph::load_graph(&graph_path) {
-            Ok(graph) => println!("{} entities", graph.entities.len()),
+            Ok(graph) => {
+                if graph.entities.is_empty() {
+                    println!("0 entities");
+                }
+                for entity in &graph.entities {
+                    println!("{}  {}  {}", entity.id, entity.kind, entity.name);
+                }
+            }
             Err(err) => eprintln!("Failed to load {}: {}", graph_path, err),
         }
     } else {
