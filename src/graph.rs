@@ -28,7 +28,10 @@ impl Graph {
 
     pub fn add_entity(&mut self, kind: &str, name: &str) -> bool {
         let id = slugify(name);
-        if !ENTITY_KINDS.contains(&kind) || self.entities.iter().any(|e| e.id == id) {
+        if id.is_empty()
+            || !ENTITY_KINDS.contains(&kind)
+            || self.entities.iter().any(|e| e.id == id)
+        {
             return false;
         }
 
@@ -81,6 +84,15 @@ mod tests {
         assert!(!graph.add_entity("place", "prince lucas"));
         assert!(!graph.add_entity("spaceship", "Someone Else"));
         assert_eq!(graph.entities.len(), 1);
+    }
+
+    #[test]
+    fn add_entity_rejects_names_with_empty_slugs() {
+        let mut graph = Graph::new();
+
+        assert!(!graph.add_entity("person", "..."));
+        assert!(!graph.add_entity("person", ""));
+        assert!(graph.entities.is_empty());
     }
 
     #[test]

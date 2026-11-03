@@ -493,7 +493,7 @@ fn main() {
         match graph::load_graph(&graph_path) {
             Ok(mut graph) => {
                 if !graph.add_entity(kind, name) {
-                    println!("Skipped {name}: duplicate or unknown kind");
+                    println!("Skipped {name}: empty id, duplicate, or unknown kind");
                 } else if let Err(err) = graph::save_graph(&graph, &graph_path) {
                     eprintln!("Failed to save {}: {}", graph_path, err);
                 } else {
