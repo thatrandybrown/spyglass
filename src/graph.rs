@@ -43,6 +43,19 @@ impl Graph {
         });
         true
     }
+
+    pub fn add_alias(&mut self, id: &str, alias: &str) -> bool {
+        let Some(entity) = self.entities.iter_mut().find(|e| e.id == id) else {
+            return false;
+        };
+        let lowered = alias.to_lowercase();
+        if entity.aliases.iter().any(|a| a.to_lowercase() == lowered) {
+            return false;
+        }
+
+        entity.aliases.push(alias.to_string());
+        true
+    }
 }
 
 pub fn load_graph(path: &str) -> Result<Graph, Box<dyn std::error::Error>> {
@@ -84,6 +97,17 @@ mod tests {
         assert!(!graph.add_entity("place", "prince lucas"));
         assert!(!graph.add_entity("spaceship", "Someone Else"));
         assert_eq!(graph.entities.len(), 1);
+    }
+
+    #[test]
+    fn add_alias_rejects_unknown_ids_and_duplicates() {
+        let mut graph = Graph::new();
+        graph.add_entity("person", "Prince Lucas");
+
+        assert!(graph.add_alias("prince-lucas", "Lucas"));
+        assert!(!graph.add_alias("prince-lucas", "lucas"));
+        assert!(!graph.add_alias("nobody", "Lucas"));
+        assert_eq!(graph.entities[0].aliases, vec!["Lucas"]);
     }
 
     #[test]
