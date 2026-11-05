@@ -502,6 +502,23 @@ fn main() {
             }
             Err(err) => eprintln!("Failed to load {}: {}", graph_path, err),
         }
+    } else if let Some(alias_args) = command.strip_prefix("graph alias ") {
+        let Some((id, alias)) = alias_args.split_once(' ') else {
+            eprintln!("Usage: cargo run -- graph alias <id> <alias>");
+            return;
+        };
+        match graph::load_graph(&graph_path) {
+            Ok(mut graph) => {
+                if !graph.add_alias(id, alias) {
+                    println!("Skipped {alias}: unknown id or duplicate alias");
+                } else if let Err(err) = graph::save_graph(&graph, &graph_path) {
+                    eprintln!("Failed to save {}: {}", graph_path, err);
+                } else {
+                    println!("Added alias {alias} to {id}");
+                }
+            }
+            Err(err) => eprintln!("Failed to load {}: {}", graph_path, err),
+        }
     } else if command == "graph show" {
         match graph::load_graph(&graph_path) {
             Ok(graph) => {
@@ -509,7 +526,17 @@ fn main() {
                     println!("0 entities");
                 }
                 for entity in &graph.entities {
-                    println!("{}  {}  {}", entity.id, entity.kind, entity.name);
+                    if entity.aliases.is_empty() {
+                        println!("{}  {}  {}", entity.id, entity.kind, entity.name);
+                    } else {
+                        println!(
+                            "{}  {}  {}  {}",
+                            entity.id,
+                            entity.kind,
+                            entity.name,
+                            entity.aliases.join(", ")
+                        );
+                    }
                 }
             }
             Err(err) => eprintln!("Failed to load {}: {}", graph_path, err),
@@ -522,6 +549,7 @@ fn main() {
         println!("  cargo run -- query <search terms>");
         println!("  cargo run -- graph show");
         println!("  cargo run -- graph add <kind> <name>");
+        println!("  cargo run -- graph alias <id> <alias>");
     }
 
     if did_mutate {
