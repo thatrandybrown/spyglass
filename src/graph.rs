@@ -56,6 +56,17 @@ impl Graph {
         entity.aliases.push(alias.to_string());
         true
     }
+
+    pub fn find(&self, name: &str) -> Vec<&Entity> {
+        let lowered = name.to_lowercase();
+        self.entities
+            .iter()
+            .filter(|e| {
+                e.name.to_lowercase() == lowered
+                    || e.aliases.iter().any(|a| a.to_lowercase() == lowered)
+            })
+            .collect()
+    }
 }
 
 pub fn load_graph(path: &str) -> Result<Graph, Box<dyn std::error::Error>> {
