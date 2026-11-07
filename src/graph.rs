@@ -122,6 +122,20 @@ mod tests {
     }
 
     #[test]
+    fn find_matches_names_and_aliases_ignoring_case() {
+        let mut graph = Graph::new();
+        graph.add_entity("person", "Prince Lucas");
+        graph.add_entity("person", "Lucas Grey");
+        graph.add_alias("prince-lucas", "Lucas");
+        graph.add_alias("lucas-grey", "Lucas");
+
+        let ids = |found: Vec<&Entity>| found.iter().map(|e| e.id.clone()).collect::<Vec<_>>();
+        assert_eq!(ids(graph.find("prince lucas")), vec!["prince-lucas"]);
+        assert_eq!(ids(graph.find("LUCAS")), vec!["prince-lucas", "lucas-grey"]);
+        assert!(graph.find("Luc").is_empty());
+    }
+
+    #[test]
     fn add_entity_rejects_names_with_empty_slugs() {
         let mut graph = Graph::new();
 
