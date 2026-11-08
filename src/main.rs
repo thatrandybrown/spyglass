@@ -412,6 +412,20 @@ fn remove_flags(args: Vec<String>) -> Vec<String> {
     result
 }
 
+fn print_entity(entity: &graph::Entity) {
+    if entity.aliases.is_empty() {
+        println!("{}  {}  {}", entity.id, entity.kind, entity.name);
+    } else {
+        println!(
+            "{}  {}  {}  {}",
+            entity.id,
+            entity.kind,
+            entity.name,
+            entity.aliases.join(", ")
+        );
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
