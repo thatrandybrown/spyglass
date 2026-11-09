@@ -540,17 +540,20 @@ fn main() {
                     println!("0 entities");
                 }
                 for entity in &graph.entities {
-                    if entity.aliases.is_empty() {
-                        println!("{}  {}  {}", entity.id, entity.kind, entity.name);
-                    } else {
-                        println!(
-                            "{}  {}  {}  {}",
-                            entity.id,
-                            entity.kind,
-                            entity.name,
-                            entity.aliases.join(", ")
-                        );
-                    }
+                    print_entity(entity);
+                }
+            }
+            Err(err) => eprintln!("Failed to load {}: {}", graph_path, err),
+        }
+    } else if let Some(name) = command.strip_prefix("graph find ") {
+        match graph::load_graph(&graph_path) {
+            Ok(graph) => {
+                let found = graph.find(name);
+                if found.is_empty() {
+                    println!("0 entities");
+                }
+                for entity in found {
+                    print_entity(entity);
                 }
             }
             Err(err) => eprintln!("Failed to load {}: {}", graph_path, err),
@@ -564,6 +567,7 @@ fn main() {
         println!("  cargo run -- graph show");
         println!("  cargo run -- graph add <kind> <name>");
         println!("  cargo run -- graph alias <id> <alias>");
+        println!("  cargo run -- graph find <name>");
     }
 
     if did_mutate {
