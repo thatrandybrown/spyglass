@@ -13,9 +13,19 @@ pub struct Entity {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
+pub struct Mention {
+    pub entity_id: String,
+    pub source: String,
+    pub start: usize,
+    pub end: usize,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct Graph {
     pub version: u32,
     pub entities: Vec<Entity>,
+    #[serde(default)]
+    pub mentions: Vec<Mention>,
 }
 
 impl Graph {
@@ -23,6 +33,7 @@ impl Graph {
         Graph {
             version: 1,
             entities: Vec::new(),
+            mentions: Vec::new(),
         }
     }
 
@@ -169,6 +180,13 @@ mod tests {
         fs::remove_file(path).unwrap();
 
         assert_eq!(loaded, graph);
+    }
+
+    #[test]
+    fn graph_without_mentions_still_loads() {
+        let graph: Graph = serde_json::from_str(r#"{"version":1,"entities":[]}"#).unwrap();
+
+        assert!(graph.mentions.is_empty());
     }
 
     #[test]
