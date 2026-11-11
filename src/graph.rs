@@ -1,3 +1,4 @@
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
@@ -106,6 +107,24 @@ pub fn slugify(name: &str) -> String {
         .join("-")
 }
 
+pub fn find_term_spans(text: &str, term: &str) -> Vec<(usize, usize)> {
+    if slugify(term).is_empty() {
+        return Vec::new();
+    }
+
+    let starts_word = term.chars().next().is_some_and(|c| c.is_alphanumeric());
+    let ends_word = term.chars().last().is_some_and(|c| c.is_alphanumeric());
+    let pattern = format!(
+        "(?i){}{}{}",
+        if starts_word { r"\b" } else { "" },
+        regex::escape(term),
+        if ends_word { r"\b" } else { "" }
+    );
+    let re = Regex::new(&pattern).unwrap();
+
+    re.find_iter(text).map(|m| (m.start(), m.end())).collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -180,6 +199,19 @@ mod tests {
         fs::remove_file(path).unwrap();
 
         assert_eq!(loaded, graph);
+    }
+
+    #[test]
+    fn find_term_spans_returns_each_match() {
+        let text = "Lucas met Rome. Then lucas left.";
+
+        assert_eq!(find_term_spans(text, "Lucas"), vec![(0, 5), (21, 26)]);
+        assert_eq!(
+            find_term_spans("St. John's, Inc. was here", "Inc."),
+            vec![(12, 16)]
+        );
+        assert!(find_term_spans(text, "").is_empty());
+        assert!(find_term_spans("wait... what...", "...").is_empty());
     }
 
     #[test]
