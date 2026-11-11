@@ -215,6 +215,22 @@ mod tests {
     }
 
     #[test]
+    fn find_term_spans_skips_matches_inside_words() {
+        assert!(find_term_spans("Lucasfilm and McLucas", "Lucas").is_empty());
+        assert!(find_term_spans("see Lucas_notes", "Lucas").is_empty());
+    }
+
+    #[test]
+    fn find_term_spans_slices_unicode_text_cleanly() {
+        let text = "Café ☕ with ZOË and Zoë";
+        let spans = find_term_spans(text, "zoë");
+
+        assert_eq!(spans.len(), 2);
+        assert_eq!(&text[spans[0].0..spans[0].1], "ZOË");
+        assert_eq!(&text[spans[1].0..spans[1].1], "Zoë");
+    }
+
+    #[test]
     fn graph_without_mentions_still_loads() {
         let graph: Graph = serde_json::from_str(r#"{"version":1,"entities":[]}"#).unwrap();
 
