@@ -125,6 +125,24 @@ pub fn find_term_spans(text: &str, term: &str) -> Vec<(usize, usize)> {
     re.find_iter(text).map(|m| (m.start(), m.end())).collect()
 }
 
+pub fn extract_mentions(graph: &Graph, title: &str, content: &str) -> Vec<Mention> {
+    let mut mentions = Vec::new();
+    for entity in &graph.entities {
+        for term in std::iter::once(&entity.name).chain(&entity.aliases) {
+            for (start, end) in find_term_spans(content, term) {
+                mentions.push(Mention {
+                    entity_id: entity.id.clone(),
+                    source: title.to_string(),
+                    start,
+                    end,
+                });
+            }
+        }
+    }
+
+    mentions
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
