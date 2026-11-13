@@ -233,6 +233,30 @@ mod tests {
     }
 
     #[test]
+    fn extract_mentions_finds_names_and_aliases() {
+        let mut graph = Graph::new();
+        graph.add_entity("person", "Prince Lucas");
+        graph.add_entity("place", "Rome");
+        graph.add_alias("prince-lucas", "Lucas");
+
+        let mentions = extract_mentions(&graph, "notes/trip.md", "Prince Lucas sailed to Rome.");
+        let found: Vec<(&str, usize, usize)> = mentions
+            .iter()
+            .map(|m| (m.entity_id.as_str(), m.start, m.end))
+            .collect();
+
+        assert_eq!(
+            found,
+            vec![
+                ("prince-lucas", 0, 12),
+                ("prince-lucas", 7, 12),
+                ("rome", 23, 27)
+            ]
+        );
+        assert!(mentions.iter().all(|m| m.source == "notes/trip.md"));
+    }
+
+    #[test]
     fn find_term_spans_skips_matches_inside_words() {
         assert!(find_term_spans("Lucasfilm and McLucas", "Lucas").is_empty());
         assert!(find_term_spans("see Lucas_notes", "Lucas").is_empty());
