@@ -140,6 +140,7 @@ pub fn extract_mentions(graph: &Graph, title: &str, content: &str) -> Vec<Mentio
         }
     }
 
+    mentions.sort_by(|a, b| (a.start, a.end, &a.entity_id).cmp(&(b.start, b.end, &b.entity_id)));
     mentions
 }
 
@@ -254,6 +255,18 @@ mod tests {
             ]
         );
         assert!(mentions.iter().all(|m| m.source == "notes/trip.md"));
+    }
+
+    #[test]
+    fn extract_mentions_sorts_by_position() {
+        let mut graph = Graph::new();
+        graph.add_entity("person", "Prince Lucas");
+        graph.add_entity("place", "Rome");
+
+        let mentions = extract_mentions(&graph, "notes/trip.md", "Rome welcomed Prince Lucas.");
+        let ids: Vec<&str> = mentions.iter().map(|m| m.entity_id.as_str()).collect();
+
+        assert_eq!(ids, vec!["rome", "prince-lucas"]);
     }
 
     #[test]
