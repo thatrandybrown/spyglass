@@ -141,6 +141,7 @@ pub fn extract_mentions(graph: &Graph, title: &str, content: &str) -> Vec<Mentio
     }
 
     mentions.sort_by(|a, b| (a.start, a.end, &a.entity_id).cmp(&(b.start, b.end, &b.entity_id)));
+    mentions.dedup();
     mentions
 }
 
@@ -267,6 +268,27 @@ mod tests {
         let ids: Vec<&str> = mentions.iter().map(|m| m.entity_id.as_str()).collect();
 
         assert_eq!(ids, vec!["rome", "prince-lucas"]);
+    }
+
+    #[test]
+    fn extract_mentions_dedupes_identical_spans() {
+        let mut graph = Graph::new();
+        graph.add_entity("person", "Prince Lucas");
+        graph.add_entity("person", "Lucas Grey");
+        graph.add_alias("prince-lucas", "prince lucas");
+        graph.add_alias("prince-lucas", "Lucas");
+        graph.add_alias("lucas-grey", "Lucas");
+
+        let mentions = extract_mentions(&graph, "notes/trip.md", "Prince Lucas.");
+        let found: Vec<(&str, usize)> = mentions
+            .iter()
+            .map(|m| (m.entity_id.as_str(), m.start))
+            .collect();
+
+        assert_eq!(
+            found,
+            vec![("prince-lucas", 0), ("lucas-grey", 7), ("prince-lucas", 7)]
+        );
     }
 
     #[test]
