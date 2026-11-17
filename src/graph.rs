@@ -79,6 +79,21 @@ impl Graph {
             })
             .collect()
     }
+
+    pub fn replace_mentions(&mut self, source: &str, mentions: Vec<Mention>) -> bool {
+        let old: Vec<&Mention> = self
+            .mentions
+            .iter()
+            .filter(|m| m.source == source)
+            .collect();
+        if old == mentions.iter().collect::<Vec<_>>() {
+            return false;
+        }
+
+        self.mentions.retain(|m| m.source != source);
+        self.mentions.extend(mentions);
+        true
+    }
 }
 
 pub fn load_graph(path: &str) -> Result<Graph, Box<dyn std::error::Error>> {
@@ -289,6 +304,21 @@ mod tests {
             found,
             vec![("prince-lucas", 0), ("lucas-grey", 7), ("prince-lucas", 7)]
         );
+    }
+
+    #[test]
+    fn replace_mentions_reports_only_real_changes() {
+        let mut graph = Graph::new();
+        graph.add_entity("place", "Rome");
+        let source = "notes/trip.md";
+
+        let first = extract_mentions(&graph, source, "Rome, then Rome.");
+        assert!(graph.replace_mentions(source, first));
+        let again = extract_mentions(&graph, source, "Rome, then Rome.");
+        assert!(!graph.replace_mentions(source, again));
+        let edited = extract_mentions(&graph, source, "Just Rome.");
+        assert!(graph.replace_mentions(source, edited));
+        assert_eq!(graph.mentions.len(), 1);
     }
 
     #[test]
