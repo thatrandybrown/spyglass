@@ -558,6 +558,27 @@ fn main() {
             }
             Err(err) => eprintln!("Failed to load {}: {}", graph_path, err),
         }
+    } else if command == "graph extract" {
+        match graph::load_graph(&graph_path) {
+            Ok(mut graph) => {
+                let mut changed = 0;
+                for doc in &index_data.documents {
+                    let mentions = graph::extract_mentions(&graph, &doc.title, &doc.content);
+                    if graph.replace_mentions(&doc.title, mentions) {
+                        changed += 1;
+                    }
+                }
+                let total = index_data.documents.len();
+                if changed == 0 {
+                    println!("Mentions up to date");
+                } else if let Err(err) = graph::save_graph(&graph, &graph_path) {
+                    eprintln!("Failed to save {}: {}", graph_path, err);
+                } else {
+                    println!("Updated mentions for {changed} of {total} documents");
+                }
+            }
+            Err(err) => eprintln!("Failed to load {}: {}", graph_path, err),
+        }
     } else {
         println!("Unknown command: {command}");
         println!("Usage:");
@@ -568,6 +589,7 @@ fn main() {
         println!("  cargo run -- graph add <kind> <name>");
         println!("  cargo run -- graph alias <id> <alias>");
         println!("  cargo run -- graph find <name>");
+        println!("  cargo run -- graph extract");
     }
 
     if did_mutate {
